@@ -6,38 +6,6 @@
   <title>PatiLink - NFC Pet Manager</title>
   <script src="/_sdk/data_sdk.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <script type="module">
-        // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        // YENİ: updateEmail eklendi
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCZSnh9jWibR4a0Pc6RKBDYlGZNXP_Tiu8",
-            authDomain: "petnfc-46178.firebaseapp.com",
-            projectId: "petnfc-46178",
-            storageBucket: "petnfc-46178.firebasestorage.app",
-            messagingSenderId: "942096749783",
-            appId: "1:942096749783:web:afcd7f8e4f4f109f3c4c92",
-            measurementId: "G-XS8LXGR545"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Make Firebase available globally
-        window.firebaseApp = app;
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        window.firebaseAnalytics = analytics;
-    </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
         body {
@@ -68,6 +36,10 @@
         .pet-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .link-expiring {
+            background-color: #fef2f2;
+            border-color: #fecaca;
         }
     </style>
   <style>@view-transition { navigation: auto; }</style>
@@ -280,11 +252,20 @@
        <h2 class="text-2xl font-bold text-gray-800">🔧 Admin Panel</h2><button id="backFromAdmin" class="text-gray-600 hover:text-gray-800 transition-colors"> <span class="text-2xl">←</span> Ana Sayfa </button>
       </div><!-- NFC Tag Management -->
       <div class="mb-8">
-       <h3 class="text-xl font-semibold text-gray-800 mb-4">🏷️ NFC Tag Yönetimi</h3>
-       <div class="bg-yellow-50 p-6 rounded-lg">
+       <h3 class="text-xl font-semibold text-gray-800 mb-4">🏷️ NFC Tag Yönetimi</h3><!-- Manual Tag Assignment -->
+       <div class="bg-yellow-50 p-6 rounded-lg mb-6">
+        <h4 class="text-lg font-medium text-gray-800 mb-4">Manuel Tag Atama</h4>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"><input type="text" id="tempTagId" placeholder="Geçici Tag ID" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"> <select id="selectPetProfile" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"> <option value="">Hayvan Profili Seçin</option> </select> <button id="assignTag" class="bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition-colors"> Tag Ata </button>
         </div>
         <p class="text-sm text-gray-600">Geçici tag ID'sini hayvan profili ile eşleştirin.</p>
+       </div><!-- NFC Writing Links -->
+       <div class="bg-blue-50 p-6 rounded-lg">
+        <h4 class="text-lg font-medium text-gray-800 mb-4">NFC Tag Yazma Linkleri</h4>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4"><select id="nfcPetSelect" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"> <option value="">Hayvan Profili Seçin</option> </select> <select id="linkDuration" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"> <option value="5">5 Dakika</option> <option value="15" selected>15 Dakika</option> <option value="30">30 Dakika</option> <option value="60">1 Saat</option> </select> <button id="createNfcLink" class="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors"> Link Oluştur </button> <button id="refreshActiveLinks" class="bg-gray-600 text-white p-3 rounded-lg hover:bg-gray-700 transition-colors"> 🔄 Yenile </button>
+        </div>
+        <p class="text-sm text-gray-600 mb-4">NFC tag yazma için geçici link oluşturun. Link belirlenen süre sonunda otomatik olarak geçersiz olur.</p><!-- Active Links -->
+        <div id="activeNfcLinks" class="space-y-3"><!-- Active links will be populated here -->
+        </div>
        </div>
       </div><!-- All Profiles -->
       <div>
@@ -309,22 +290,15 @@
         // IP Geolocation API Configuration
         const IP_GEOLOCATION_API_KEY = "b647e2a9739c445984120017ef0a3884";
         
-        // Firebase is already initialized in the module script above
-        let auth, db;
+        // Demo mode - no Firebase needed
+        let auth = { demo: true };
+        let db = { demo: true };
         
-        // Wait for Firebase to be available
+        // Wait for Firebase to be available (demo mode)
         function waitForFirebase() {
             return new Promise((resolve) => {
-                const checkFirebase = () => {
-                    if (window.firebaseAuth && window.firebaseDb) {
-                        auth = window.firebaseAuth;
-                        db = window.firebaseDb;
-                        resolve();
-                    } else {
-                        setTimeout(checkFirebase, 100);
-                    }
-                };
-                checkFirebase();
+                // Immediately resolve in demo mode
+                resolve();
             });
         }
 
@@ -333,7 +307,9 @@
         let currentPetId = null;
         let allPets = [];
         let allActivities = [];
+        let allNfcLinks = [];
         let customFieldCount = 0;
+        let linkUpdateInterval = null;
 
         // Default configuration
         const defaultConfig = {
@@ -347,10 +323,13 @@
             onDataChanged(data) {
                 allPets = data.filter(item => item.type === 'pet');
                 allActivities = data.filter(item => item.type === 'activity');
+                allNfcLinks = data.filter(item => item.type === 'nfc_link');
                 updatePetsList();
                 updateAdminPetsList();
                 updatePetProfileSelect();
+                updateNfcPetSelect();
                 updateStatsDisplay();
+                updateActiveNfcLinks();
             }
         };
 
@@ -451,6 +430,8 @@
 
             // Admin functions
             document.getElementById('assignTag').addEventListener('click', handleTagAssignment);
+            document.getElementById('createNfcLink').addEventListener('click', handleCreateNfcLink);
+            document.getElementById('refreshActiveLinks').addEventListener('click', updateActiveNfcLinks);
 
             // Emergency actions
             document.getElementById('callOwner').addEventListener('click', () => callNumber('owner'));
@@ -557,6 +538,13 @@
         function handleLogout() {
             currentUser = null;
             localStorage.removeItem('patilink_user');
+            
+            // Clear link update interval
+            if (linkUpdateInterval) {
+                clearInterval(linkUpdateInterval);
+                linkUpdateInterval = null;
+            }
+            
             showAuthScreen();
         }
 
@@ -619,6 +607,12 @@
         function showAdminScreen() {
             hideAllScreens();
             document.getElementById('adminScreen').classList.remove('hidden');
+            
+            // Start link update interval
+            if (!linkUpdateInterval) {
+                linkUpdateInterval = setInterval(updateActiveNfcLinks, 60000); // Update every minute
+            }
+            updateActiveNfcLinks();
         }
 
         function hideAllScreens() {
@@ -1131,6 +1125,16 @@
                 `).join('');
         }
 
+        function updateNfcPetSelect() {
+            if (!currentUser?.isAdmin) return;
+            
+            const select = document.getElementById('nfcPetSelect');
+            select.innerHTML = '<option value="">Hayvan Profili Seçin</option>' + 
+                allPets.map(pet => `
+                    <option value="${pet.id}">${pet.petName} - ${pet.ownerName}</option>
+                `).join('');
+        }
+
         async function handleTagAssignment() {
             const tempTagId = document.getElementById('tempTagId').value.trim();
             const selectedPetId = document.getElementById('selectPetProfile').value;
@@ -1164,6 +1168,156 @@
             }
             
             hideLoading('assignTag', 'Tag Ata');
+        }
+
+        // NFC Link Management
+        async function handleCreateNfcLink() {
+            const selectedPetId = document.getElementById('nfcPetSelect').value;
+            const duration = parseInt(document.getElementById('linkDuration').value);
+            
+            if (!selectedPetId) {
+                showMessage("Lütfen bir hayvan profili seçin", "error");
+                return;
+            }
+            
+            const pet = allPets.find(p => p.id === selectedPetId);
+            if (!pet) {
+                showMessage("Profil bulunamadı", "error");
+                return;
+            }
+            
+            showLoading('createNfcLink');
+            
+            try {
+                const linkId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                const expiresAt = new Date(Date.now() + duration * 60 * 1000).toISOString();
+                const profileUrl = `${window.location.origin}?pet=${selectedPetId}`;
+                
+                const linkData = {
+                    id: linkId,
+                    type: 'nfc_link',
+                    petId: selectedPetId,
+                    petName: pet.petName,
+                    ownerName: pet.ownerName,
+                    profileUrl: profileUrl,
+                    createdBy: currentUser.id,
+                    createdByName: currentUser.name,
+                    createdAt: new Date().toISOString(),
+                    expiresAt: expiresAt,
+                    duration: duration,
+                    isActive: true
+                };
+                
+                const result = await window.dataSdk.create(linkData);
+                
+                if (result.isOk) {
+                    showMessage(`${duration} dakikalık NFC yazma linki oluşturuldu`, "success");
+                    document.getElementById('nfcPetSelect').value = '';
+                    updateActiveNfcLinks();
+                } else {
+                    showMessage("Link oluşturulamadı", "error");
+                }
+            } catch (error) {
+                showMessage("Link oluşturulurken hata oluştu", "error");
+            }
+            
+            hideLoading('createNfcLink', 'Link Oluştur');
+        }
+
+        function updateActiveNfcLinks() {
+            if (!currentUser?.isAdmin) return;
+            
+            const container = document.getElementById('activeNfcLinks');
+            const now = new Date();
+            
+            // Filter active links (not expired)
+            const activeLinks = allNfcLinks.filter(link => {
+                const expiresAt = new Date(link.expiresAt);
+                return link.isActive && expiresAt > now;
+            });
+            
+            if (activeLinks.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">Aktif link bulunmuyor</p>';
+                return;
+            }
+            
+            container.innerHTML = activeLinks.map(link => {
+                const expiresAt = new Date(link.expiresAt);
+                const timeLeft = Math.max(0, Math.floor((expiresAt - now) / 1000 / 60)); // minutes left
+                const isExpiring = timeLeft <= 30; // Less than 30 minutes left
+                
+                return `
+                    <div class="bg-white border ${isExpiring ? 'border-red-300 link-expiring' : 'border-gray-200'} rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h5 class="font-medium text-gray-800">${link.petName}</h5>
+                                <p class="text-sm text-gray-600">Sahip: ${link.ownerName}</p>
+                                <p class="text-sm text-gray-600">Oluşturan: ${link.createdByName}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm ${isExpiring ? 'text-red-600 font-medium' : 'text-green-600'}">
+                                    ${timeLeft} dakika kaldı
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    ${new Date(link.createdAt).toLocaleString('tr-TR')}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-3 rounded-lg mb-3">
+                            <p class="text-xs text-gray-600 mb-2">NFC Yazma Linki:</p>
+                            <div class="flex items-center space-x-2">
+                                <input type="text" value="${link.profileUrl}" readonly class="flex-1 text-sm p-2 border border-gray-300 rounded bg-white">
+                                <button onclick="copyNfcLink('${link.profileUrl}')" class="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors">
+                                    Kopyala
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button onclick="cancelNfcLink('${link.id}')" class="bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700 transition-colors">
+                                İptal Et
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function copyNfcLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                showMessage("NFC yazma linki kopyalandı", "success");
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showMessage("NFC yazma linki kopyalandı", "success");
+            });
+        }
+
+        async function cancelNfcLink(linkId) {
+            if (!confirm("Bu linki iptal etmek istediğinizden emin misiniz?")) {
+                return;
+            }
+            
+            const link = allNfcLinks.find(l => l.id === linkId);
+            if (!link) return;
+            
+            try {
+                const result = await window.dataSdk.delete(link);
+                if (result.isOk) {
+                    showMessage("Link iptal edildi", "success");
+                    updateActiveNfcLinks();
+                } else {
+                    showMessage("Link iptal edilirken hata oluştu", "error");
+                }
+            } catch (error) {
+                showMessage("Link iptal edilirken hata oluştu", "error");
+            }
         }
 
         async function deletePet(petId) {
@@ -1526,6 +1680,5 @@
             checkPetParameter();
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991b0b0b453750ed',t:'MTc2MDk4OTgxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991b17e281602a87',t:'MTc2MDk5MDM0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
