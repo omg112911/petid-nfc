@@ -129,8 +129,8 @@
        </div>
       </div><!-- NFC Okuma Bölümü -->
       <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-       <h4 class="font-bold text-blue-800 mb-3"><i class="fas fa-search mr-2"></i>NFC Tag Okuma</h4>
-       <p class="text-sm text-blue-700 mb-3">Mevcut NFC tag'ini okumak için butona tıklayın ve tag'i cihaza yaklaştırın</p><button id="readNfcBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"> <i class="fas fa-spinner fa-spin loading" id="readNfcLoading"></i> <i class="fas fa-search mr-2"></i>NFC Tag Oku </button>
+       <h4 class="font-bold text-blue-800 mb-3"><i class="fas fa-search mr-2"></i>NFC Tag Okuma &amp; Hayvan Atama</h4>
+       <p class="text-sm text-blue-700 mb-3">NFC tag'ini okumak ve hayvan profili atamak için butona tıklayın</p><button id="readNfcBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"> <i class="fas fa-spinner fa-spin loading" id="readNfcLoading"></i> <i class="fas fa-search mr-2"></i>NFC Tag Oku </button>
        <div id="nfcReadResult" class="mt-3 hidden">
         <div class="p-3 bg-white border rounded">
          <p class="font-semibold text-green-800">Okunan NFC İçeriği:</p>
@@ -163,7 +163,9 @@
         <li>• NFC özelliği sadece HTTPS bağlantılarda çalışır</li>
         <li>• Cihazınızın NFC özelliği açık olmalıdır</li>
         <li>• Tag'i cihaza yaklaştırırken sabit tutun</li>
-        <li>• Yazma işlemi sırasında tag'i hareket ettirmeyin</li>
+        <li>• <strong>iPhone:</strong> Sadece NFC okuma desteklenir, yazma yapılamaz</li>
+        <li>• <strong>Android:</strong> Hem okuma hem yazma desteklenir</li>
+        <li>• iPhone'da NFC tag yazma için Android cihaz kullanın</li>
        </ul>
       </div>
      </div>
@@ -277,6 +279,22 @@
        <div class="flex justify-end space-x-2"><button id="closeLocationModal" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">Kapat</button>
        </div>
       </div>
+     </div><!-- NFC Hayvan Atama Modalı -->
+     <div id="nfcAssignModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full">
+       <h3 class="text-lg font-bold mb-4 flex items-center"><i class="fas fa-wifi mr-2 text-blue-600"></i>NFC Tag'e Hayvan Ata</h3>
+       <div id="nfcAssignContent">
+        <div class="mb-4">
+         <p class="text-gray-600 mb-3">Bu NFC tag'ine hangi hayvan profilini atamak istiyorsunuz?</p>
+         <div id="nfcTagInfo" class="p-3 bg-gray-100 rounded mb-4">
+          <p class="text-sm"><strong>Tag ID:</strong> <span id="nfcTagId">-</span></p>
+          <p class="text-sm"><strong>Mevcut Durum:</strong> <span id="nfcTagStatus">Boş</span></p>
+         </div><label class="block text-gray-700 text-sm font-bold mb-2">Hayvan Profili Seç</label> <select id="assignProfileSelect" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"> <option value="">Profil Seçin</option> </select>
+        </div>
+        <div class="flex justify-end space-x-2"><button id="cancelAssignBtn" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">İptal</button> <button id="confirmAssignBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"> <i class="fas fa-spinner fa-spin loading" id="assignLoading"></i> Ata </button>
+        </div>
+       </div>
+      </div>
      </div>
     </main>
    </div>
@@ -322,18 +340,36 @@
         // NFC Destek Kontrolü
         async function checkNfcSupport() {
             try {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                
                 if ('NDEFReader' in window) {
                     nfcSupported = true;
                     nfcReader = new NDEFReader();
                     nfcWriter = new NDEFReader();
                     
-                    document.getElementById('nfcStatusText').innerHTML = 
-                        '<span class="text-green-600"><i class="fas fa-check mr-1"></i>NFC Destekleniyor</span>';
-                    
-                    // NFC butonlarını etkinleştir
-                    document.getElementById('readNfcBtn').disabled = false;
-                    document.getElementById('writeNfcBtn').disabled = false;
-                    document.getElementById('clearNfcBtn').disabled = false;
+                    if (isIOS) {
+                        document.getElementById('nfcStatusText').innerHTML = 
+                            '<span class="text-yellow-600"><i class="fas fa-info-circle mr-1"></i>iPhone - Sadece Okuma</span>';
+                        
+                        // iPhone'da sadece okuma
+                        document.getElementById('readNfcBtn').disabled = false;
+                        document.getElementById('writeNfcBtn').disabled = true;
+                        document.getElementById('clearNfcBtn').disabled = true;
+                        
+                        // iPhone uyarısı ekle
+                        document.getElementById('writeNfcBtn').innerHTML = 
+                            '<i class="fas fa-ban mr-2"></i>iPhone\'da Yazma Desteklenmiyor';
+                        document.getElementById('clearNfcBtn').innerHTML = 
+                            '<i class="fas fa-ban mr-2"></i>iPhone\'da Yazma Desteklenmiyor';
+                    } else {
+                        document.getElementById('nfcStatusText').innerHTML = 
+                            '<span class="text-green-600"><i class="fas fa-check mr-1"></i>NFC Tam Destek</span>';
+                        
+                        // Android'de tam destek
+                        document.getElementById('readNfcBtn').disabled = false;
+                        document.getElementById('writeNfcBtn').disabled = false;
+                        document.getElementById('clearNfcBtn').disabled = false;
+                    }
                 } else {
                     nfcSupported = false;
                     document.getElementById('nfcStatusText').innerHTML = 
@@ -370,11 +406,12 @@
                 await nfcReader.scan();
                 showMessage('NFC tag\'ini cihaza yaklaştırın...', 'info');
 
-                nfcReader.addEventListener('reading', ({ message, serialNumber }) => {
+                nfcReader.addEventListener('reading', async ({ message, serialNumber }) => {
                     loading.classList.remove('show');
                     
                     let content = 'Tag boş veya okunamıyor';
                     let profileId = null;
+                    let isAssigned = false;
                     
                     if (message && message.records && message.records.length > 0) {
                         const record = message.records[0];
@@ -385,6 +422,9 @@
                             try {
                                 const url = new URL(record.data);
                                 profileId = url.searchParams.get('profile');
+                                if (profileId) {
+                                    isAssigned = true;
+                                }
                             } catch (e) {
                                 console.log('URL parse edilemedi:', e);
                             }
@@ -394,8 +434,11 @@
                         }
                     }
                     
-                    // Profil ID varsa buton ekle
-                    if (profileId) {
+                    // Tag ID'sini kaydet
+                    window.currentNfcTagId = serialNumber;
+                    
+                    if (isAssigned && profileId) {
+                        // Tag'e zaten hayvan atanmış - profili göster
                         contentDiv.innerHTML = `
                             <div class="flex items-center justify-between">
                                 <span class="break-all">${content}</span>
@@ -404,20 +447,33 @@
                                 </button>
                             </div>
                         `;
-                    } else {
-                        contentDiv.textContent = content;
-                    }
-                    
-                    resultDiv.classList.remove('hidden');
-                    
-                    showMessage('NFC tag başarıyla okundu!', 'success');
-                    
-                    // Eğer profil ID varsa otomatik olarak profili aç
-                    if (profileId) {
+                        
+                        showMessage('NFC tag\'inde hayvan profili bulundu!', 'success');
+                        
+                        // Otomatik olarak profili aç
                         setTimeout(() => {
                             openNfcProfile(profileId);
                         }, 1500);
+                    } else {
+                        // Tag boş veya geçersiz - hayvan atama modalını aç
+                        contentDiv.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <span class="text-orange-600">Tag boş - Hayvan profili atanabilir</span>
+                                <button onclick="showNfcAssignModal('${serialNumber}')" class="ml-2 bg-orange-500 text-white px-3 py-1 rounded text-sm hover:bg-orange-600 whitespace-nowrap">
+                                    <i class="fas fa-plus mr-1"></i>Hayvan Ata
+                                </button>
+                            </div>
+                        `;
+                        
+                        showMessage('NFC tag boş - Hayvan profili atayabilirsiniz', 'info');
+                        
+                        // Otomatik olarak atama modalını aç
+                        setTimeout(() => {
+                            showNfcAssignModal(serialNumber);
+                        }, 1000);
                     }
+                    
+                    resultDiv.classList.remove('hidden');
                 });
 
                 nfcReader.addEventListener('readingerror', () => {
@@ -549,7 +605,96 @@
             }
         }
 
-        // NFC Kaydını Firebase'e Kaydet
+        // NFC Atama Modalını Göster
+        function showNfcAssignModal(tagId) {
+            const modal = document.getElementById('nfcAssignModal');
+            const tagIdSpan = document.getElementById('nfcTagId');
+            const tagStatusSpan = document.getElementById('nfcTagStatus');
+            const assignSelect = document.getElementById('assignProfileSelect');
+            
+            // Tag bilgilerini güncelle
+            tagIdSpan.textContent = tagId || 'Bilinmiyor';
+            tagStatusSpan.textContent = 'Boş - Atama Bekliyor';
+            
+            // Kullanıcının profillerini yükle
+            assignSelect.innerHTML = '<option value="">Profil Seçin</option>' + 
+                allProfiles.map(profile => 
+                    `<option value="${profile.id}">${profile.petName} (${profile.petType})</option>`
+                ).join('');
+            
+            modal.classList.remove('hidden');
+        }
+
+        // NFC Atama İşlemi
+        async function assignNfcTag() {
+            const profileId = document.getElementById('assignProfileSelect').value;
+            const tagId = window.currentNfcTagId;
+            
+            if (!profileId) {
+                showMessage('Lütfen bir profil seçin', 'error');
+                return;
+            }
+
+            const loading = document.getElementById('assignLoading');
+            loading.classList.add('show');
+
+            try {
+                // Site tarafından otomatik URL oluştur
+                const profileUrl = `${window.location.origin}?profile=${profileId}`;
+                
+                // NFC tag'e yaz
+                await nfcWriter.write({
+                    records: [{
+                        recordType: "url",
+                        data: profileUrl
+                    }]
+                });
+                
+                // Firebase'e NFC atamasını kaydet
+                await saveNfcAssignment(tagId, profileId, profileUrl);
+                
+                loading.classList.remove('show');
+                document.getElementById('nfcAssignModal').classList.add('hidden');
+                
+                showMessage('NFC tag\'ine hayvan profili başarıyla atandı!', 'success');
+                
+                // Profili otomatik aç
+                setTimeout(() => {
+                    openNfcProfile(profileId);
+                }, 1500);
+                
+            } catch (error) {
+                loading.classList.remove('show');
+                console.error('NFC atama hatası:', error);
+                showMessage('NFC atama hatası: ' + error.message, 'error');
+            }
+        }
+
+        // NFC Atamasını Firebase'e Kaydet
+        async function saveNfcAssignment(tagId, profileId, url) {
+            try {
+                const nfcAssignment = {
+                    tagId: tagId,
+                    profileId: profileId,
+                    url: url,
+                    assignedBy: currentUser.uid,
+                    assignedAt: new Date().toISOString(),
+                    isActive: true,
+                    assignmentType: 'auto' // Site tarafından otomatik atama
+                };
+
+                await window.firebaseServices.addDoc(
+                    window.firebaseServices.collection(window.firebaseDb, 'nfc_assignments'),
+                    nfcAssignment
+                );
+                
+                console.log('NFC ataması Firebase\'e kaydedildi');
+            } catch (error) {
+                console.error('NFC ataması Firebase\'e kaydedilirken hata:', error);
+            }
+        }
+
+        // NFC Kaydını Firebase'e Kaydet (Eski fonksiyon - uyumluluk için)
         async function saveNfcRecord(profileId, url) {
             try {
                 const nfcRecord = {
@@ -1342,6 +1487,13 @@
                 document.getElementById('locationModal').classList.add('hidden');
             });
 
+            // NFC Atama Modal Event Listeners
+            document.getElementById('cancelAssignBtn').addEventListener('click', () => {
+                document.getElementById('nfcAssignModal').classList.add('hidden');
+            });
+
+            document.getElementById('confirmAssignBtn').addEventListener('click', assignNfcTag);
+
             document.getElementById('addCustomFieldBtn').addEventListener('click', addCustomField);
 
             // NFC Event Listeners
@@ -1364,6 +1516,8 @@
         window.cancelDelete = cancelDelete;
         window.copyProfileLink = copyProfileLink;
         window.openNfcProfile = openNfcProfile;
+        window.showNfcAssignModal = showNfcAssignModal;
+        window.assignNfcTag = assignNfcTag;
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991bc67747972a87',t:'MTc2MDk5NzQ5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991bdb73f64c50ed',t:'MTc2MDk5ODM1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
