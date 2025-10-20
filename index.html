@@ -412,18 +412,7 @@
         async function initializeSDKs() {
             console.log("SDK'lar başlatılıyor...");
             
-            // SDK'ların yüklenmesini bekle
-            const sdksLoaded = await waitForSDKs();
-            
-            if (!sdksLoaded) {
-                console.error("SDK'lar yüklenemedi");
-                showToast("Veri sistemi yüklenemedi, lütfen sayfayı yenileyin.", "error");
-                return;
-            }
-
-            console.log("SDK'lar yüklendi, başlatılıyor...");
-
-            // Element SDK'yı başlat
+            // Element SDK'yı hemen başlat
             try {
                 if (window.elementSdk) {
                     await window.elementSdk.init(elementApi);
@@ -433,27 +422,35 @@
                 console.error("Element SDK başlatma hatası:", error);
             }
             
-            // Data SDK'yı başlat
+            // Data SDK'yı başlat - daha basit yaklaşım
             try {
                 if (window.dataSdk) {
+                    console.log("Data SDK başlatılıyor...");
                     const initResult = await window.dataSdk.init(dataHandler);
                     if (initResult.isOk) {
                         console.log("Data SDK başarıyla başlatıldı");
-                        showToast("Veri sistemi hazır!", "success");
-                        
-                        // SDK hazır olduğunu işaretle
                         window.sdkReady = true;
                         updateSDKStatus('ready');
+                        showToast("Veri sistemi hazır!", "success");
                     } else {
                         console.error("Data SDK başlatma hatası:", initResult.error);
-                        showToast("Veri sistemi başlatılamadı: " + initResult.error.message, "error");
-                        updateSDKStatus('error');
+                        // Fallback - SDK olmadan da çalışabilir
+                        window.sdkReady = false;
+                        updateSDKStatus('fallback');
+                        showToast("Veri sistemi fallback modda çalışıyor", "info");
                     }
+                } else {
+                    console.log("Data SDK bulunamadı, fallback moda geçiliyor");
+                    window.sdkReady = false;
+                    updateSDKStatus('fallback');
+                    showToast("Veri sistemi fallback modda çalışıyor", "info");
                 }
             } catch (error) {
                 console.error("Data SDK başlatma hatası:", error);
-                showToast("Veri sistemi başlatılamadı: " + error.message, "error");
-                updateSDKStatus('error');
+                // Fallback - SDK olmadan da çalışabilir
+                window.sdkReady = false;
+                updateSDKStatus('fallback');
+                showToast("Veri sistemi fallback modda çalışıyor", "info");
             }
         }
 
@@ -467,6 +464,12 @@
                     break;
                 case 'ready':
                     statusElement.innerHTML = '<span class="text-green-600">✅ Veri sistemi hazır</span>';
+                    setTimeout(() => {
+                        statusElement.style.display = 'none';
+                    }, 3000);
+                    break;
+                case 'fallback':
+                    statusElement.innerHTML = '<span class="text-blue-600">⚡ Sistem hazır (yerel mod)</span>';
                     setTimeout(() => {
                         statusElement.style.display = 'none';
                     }, 3000);
@@ -652,9 +655,20 @@
                 document.getElementById('adminSection').classList.remove('hidden');
             }
             
+            // Profilleri yükle - SDK yoksa localStorage'dan
+            loadProfiles();
             renderProfiles();
             updateAdminProfileSelect();
             updatePendingNfcTags();
+        }
+
+        function loadProfiles() {
+            if (!window.dataSdk || !window.sdkReady) {
+                // Fallback: localStorage'dan profilleri yükle
+                const profiles = JSON.parse(localStorage.getItem('patilink_profiles') || '[]');
+                allProfiles = profiles.filter(p => p.type === 'profile');
+                console.log('Profiller localStorage\'dan yüklendi:', allProfiles.length);
+            }
         }
 
         function showNfcAssignPage() {
@@ -794,15 +808,6 @@
             btn.disabled = true;
 
             try {
-                // Data SDK kontrolü - daha detaylı
-                if (!window.dataSdk) {
-                    throw new Error("Veri sistemi henüz yüklenmedi. Lütfen sayfayı yenileyin.");
-                }
-                
-                if (!window.sdkReady) {
-                    throw new Error("Veri sistemi henüz hazır değil. Lütfen birkaç saniye bekleyin ve tekrar deneyin.");
-                }
-
                 const profileData = {
                     type: 'profile',
                     userId: currentUser.uid,
@@ -830,40 +835,56 @@
                     createdAt: currentProfile?.createdAt || new Date().toISOString()
                 };
 
-                if (currentProfile) {
-                    profileData.id = currentProfile.id;
-                    const result = await window.dataSdk.update({...currentProfile, ...profileData});
-                    if (result.isOk) {
-                        showToast("Profil güncellendi!");
-                        
-                        // NFC tag bekliyorsa temizle
-                        if (pendingNfcTagId) {
-                            pendingNfcTagId = null;
-                            window.history.replaceState({}, document.title, window.location.pathname);
+                // Data SDK varsa kullan, yoksa localStorage'a kaydet
+                if (window.dataSdk && window.sdkReady) {
+                    if (currentProfile) {
+                        profileData.id = currentProfile.id;
+                        const result = await window.dataSdk.update({...currentProfile, ...profileData});
+                        if (result.isOk) {
+                            showToast("Profil güncellendi!");
+                        } else {
+                            throw new Error("Güncelleme başarısız");
                         }
-                        
-                        showMainPage();
                     } else {
-                        throw new Error("Güncelleme başarısız");
+                        profileData.id = 'profile_' + Date.now();
+                        const result = await window.dataSdk.create(profileData);
+                        if (result.isOk) {
+                            showToast("Profil oluşturuldu!");
+                        } else {
+                            throw new Error("Oluşturma başarısız");
+                        }
                     }
                 } else {
-                    profileData.id = 'profile_' + Date.now();
-                    const result = await window.dataSdk.create(profileData);
-                    if (result.isOk) {
-                        showToast("Profil oluşturuldu!");
-                        
-                        // NFC tag bekliyorsa temizle
-                        if (pendingNfcTagId) {
-                            showToast(`NFC Tag "${pendingNfcTagId}" profile atandı!`);
-                            pendingNfcTagId = null;
-                            window.history.replaceState({}, document.title, window.location.pathname);
+                    // Fallback: localStorage kullan
+                    profileData.id = currentProfile?.id || 'profile_' + Date.now();
+                    const profiles = JSON.parse(localStorage.getItem('patilink_profiles') || '[]');
+                    
+                    if (currentProfile) {
+                        const index = profiles.findIndex(p => p.id === currentProfile.id);
+                        if (index >= 0) {
+                            profiles[index] = profileData;
                         }
-                        
-                        showMainPage();
+                        showToast("Profil güncellendi! (yerel kayıt)");
                     } else {
-                        throw new Error("Oluşturma başarısız");
+                        profiles.push(profileData);
+                        showToast("Profil oluşturuldu! (yerel kayıt)");
                     }
+                    
+                    localStorage.setItem('patilink_profiles', JSON.stringify(profiles));
+                    
+                    // Manuel olarak profilleri güncelle
+                    allProfiles = profiles;
+                    renderProfiles();
                 }
+                
+                // NFC tag bekliyorsa temizle
+                if (pendingNfcTagId) {
+                    showToast(`NFC Tag "${pendingNfcTagId}" profile atandı!`);
+                    pendingNfcTagId = null;
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+                
+                showMainPage();
             } catch (error) {
                 showToast("Kayıt başarısız: " + error.message, "error");
                 console.error("Profile save error:", error);
@@ -1526,5 +1547,5 @@
             }
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991b5e20d2892a87',t:'MTc2MDk5MzIxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991b64dd55fe2a87',t:'MTc2MDk5MzQ5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
