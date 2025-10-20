@@ -47,6 +47,9 @@
             query,
             where
         };
+        
+        // Firebase yüklendiğini işaretle
+        window.firebaseLoaded = true;
     </script>
   <style>
         body {
@@ -171,8 +174,8 @@
        </div>
       </div><!-- NFC Okuma Bölümü -->
       <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-       <h4 class="font-bold text-blue-800 mb-3"><i class="fas fa-search mr-2"></i>NFC Tag Okuma &amp; Hayvan Atama</h4>
-       <p class="text-sm text-blue-700 mb-3">NFC tag'ini okumak ve hayvan profili atamak için butona tıklayın</p><button id="readNfcBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"> <i class="fas fa-spinner fa-spin loading" id="readNfcLoading"></i> <i class="fas fa-search mr-2"></i>NFC Tag Oku </button>
+       <h4 class="font-bold text-blue-800 mb-3"><i class="fas fa-search mr-2"></i>NFC Tag Okuma</h4>
+       <p class="text-sm text-blue-700 mb-3">NFC tag'ini okumak için butona tıklayın</p><button id="readNfcBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"> <i class="fas fa-spinner fa-spin loading" id="readNfcLoading"></i> <i class="fas fa-search mr-2"></i>NFC Tag Oku </button>
        <div id="nfcReadResult" class="mt-3 hidden">
         <div class="p-3 bg-white border rounded">
          <p class="font-semibold text-green-800">Okunan NFC İçeriği:</p>
@@ -207,18 +210,7 @@
         <li>• Tag'i cihaza yaklaştırırken sabit tutun</li>
         <li>• <strong>iPhone:</strong> Sadece NFC okuma desteklenir, yazma yapılamaz</li>
         <li>• <strong>Android:</strong> Hem okuma hem yazma desteklenir</li>
-        <li>• iPhone'da NFC tag yazma için Android cihaz kullanın</li>
        </ul>
-       <div class="mt-3 p-2 bg-blue-50 border border-blue-200 rounded">
-        <h6 class="font-semibold text-blue-800 mb-1"><i class="fas fa-magic mr-1"></i>Akıllı NFC Atama Sistemi</h6>
-        <ul class="text-xs text-blue-700 space-y-1">
-         <li>• NFC tag'inde link varsa otomatik hayvan profili atanabilir</li>
-         <li>• iPhone'da okuma ile bile hayvan profili atama yapılabilir</li>
-         <li>• Mevcut link korunur, sadece profil parametresi eklenir</li>
-         <li>• Tag boşsa otomatik site linki yazılır (Android'de)</li>
-         <li>• Tüm atamalar Firebase'de güvenli şekilde saklanır</li>
-        </ul>
-       </div>
       </div>
      </div>
     </main>
@@ -312,7 +304,7 @@
       <div class="flex items-center"><button id="backFromViewBtn" class="mr-4 text-white hover:text-gray-200"> <i class="fas fa-arrow-left text-xl"></i> </button>
        <h1 id="viewProfileTitle" class="text-xl font-bold">Profil</h1>
       </div>
-      <div class="flex space-x-2"><button id="shareLocationBtn" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"> <i class="fas fa-map-marker-alt mr-1"></i>Konum Gönder </button> <button id="editProfileBtn" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"> <i class="fas fa-edit mr-1"></i>Düzenle </button>
+      <div class="flex space-x-2"><button id="shareLocationBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-600 shadow-lg"> <i class="fas fa-map-marker-alt mr-2"></i>Konum Gönder </button> <button id="editProfileBtn" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"> <i class="fas fa-edit mr-1"></i>Düzenle </button>
       </div>
      </div>
     </header>
@@ -379,22 +371,6 @@
        <div class="flex justify-end space-x-2"><button id="closeLocationModal" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">Kapat</button>
        </div>
       </div>
-     </div><!-- NFC Hayvan Atama Modalı -->
-     <div id="nfcAssignModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg p-6 max-w-md w-full">
-       <h3 class="text-lg font-bold mb-4 flex items-center"><i class="fas fa-wifi mr-2 text-blue-600"></i>NFC Tag'e Hayvan Ata</h3>
-       <div id="nfcAssignContent">
-        <div class="mb-4">
-         <p class="text-gray-600 mb-3">Bu NFC tag'ine hangi hayvan profilini atamak istiyorsunuz?</p>
-         <div id="nfcTagInfo" class="p-3 bg-gray-100 rounded mb-4">
-          <p class="text-sm"><strong>Tag ID:</strong> <span id="nfcTagId">-</span></p>
-          <p class="text-sm"><strong>Mevcut Durum:</strong> <span id="nfcTagStatus">Boş</span></p>
-         </div><label class="block text-gray-700 text-sm font-bold mb-2">Hayvan Profili Seç</label> <select id="assignProfileSelect" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"> <option value="">Profil Seçin</option> </select>
-        </div>
-        <div class="flex justify-end space-x-2"><button id="cancelAssignBtn" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">İptal</button> <button id="confirmAssignBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"> <i class="fas fa-spinner fa-spin loading" id="assignLoading"></i> Ata </button>
-        </div>
-       </div>
-      </div>
      </div>
     </main>
    </div>
@@ -415,6 +391,39 @@
             app_title: "PatiLink",
             welcome_message: "Evcil hayvanınız için dijital kimlik"
         };
+
+        // Firebase hazır olma kontrolü
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                let attempts = 0;
+                const maxAttempts = 100; // 10 saniye bekle
+                
+                const checkFirebase = () => {
+                    attempts++;
+                    if (window.firebaseDb && window.firebaseServices && window.firebaseAuth) {
+                        resolve(true);
+                    } else if (attempts >= maxAttempts) {
+                        resolve(false);
+                    } else {
+                        setTimeout(checkFirebase, 100);
+                    }
+                };
+                
+                checkFirebase();
+            });
+        }
+
+        // Dinamik URL oluşturma - hem GitHub hem host için uyumlu
+        function getBaseUrl() {
+            const currentUrl = window.location.href;
+            const url = new URL(currentUrl);
+            
+            // Query parametrelerini temizle
+            url.search = '';
+            url.hash = '';
+            
+            return url.toString();
+        }
 
         // IP Geolocation API
         async function getUserLocation() {
@@ -506,106 +515,25 @@
                 await nfcReader.scan();
                 showMessage('NFC tag\'ini cihaza yaklaştırın...', 'info');
 
-                nfcReader.addEventListener('reading', async ({ message, serialNumber }) => {
+                nfcReader.addEventListener('reading', ({ message, serialNumber }) => {
                     loading.classList.remove('show');
                     
                     let content = 'Tag boş veya okunamıyor';
-                    let tagUrl = null;
-                    let profileId = null;
-                    let isAssigned = false;
                     
                     if (message && message.records && message.records.length > 0) {
                         const record = message.records[0];
                         if (record.recordType === 'url') {
                             content = record.data;
-                            tagUrl = record.data;
-                            
-                            // URL'den profil ID'sini çıkar
-                            try {
-                                const url = new URL(record.data);
-                                profileId = url.searchParams.get('profile');
-                                if (profileId) {
-                                    isAssigned = true;
-                                }
-                            } catch (e) {
-                                console.log('URL parse edilemedi:', e);
-                            }
                         } else if (record.recordType === 'text') {
                             const textDecoder = new TextDecoder(record.encoding);
                             content = textDecoder.decode(record.data);
-                            tagUrl = content;
                         }
                     }
                     
-                    // Tag ID'sini kaydet
-                    window.currentNfcTagId = serialNumber;
-                    window.currentNfcTagUrl = tagUrl;
-                    
-                    if (isAssigned && profileId) {
-                        // Tag'e zaten hayvan atanmış - profili göster
-                        contentDiv.innerHTML = `
-                            <div class="space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-600 break-all">${content}</span>
-                                    <button onclick="openNfcProfile('${profileId}')" class="ml-2 bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 whitespace-nowrap">
-                                        <i class="fas fa-eye mr-1"></i>Profili Aç
-                                    </button>
-                                </div>
-                                <div class="text-center">
-                                    <button onclick="showNfcReassignModal('${serialNumber}', '${tagUrl}')" class="bg-blue-500 text-white px-4 py-2 rounded text-sm hover:bg-blue-600">
-                                        <i class="fas fa-sync mr-1"></i>Farklı Hayvan Ata
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                        
-                        showMessage('NFC tag\'inde hayvan profili bulundu!', 'success');
-                        
-                        // Otomatik olarak profili aç
-                        setTimeout(() => {
-                            openNfcProfile(profileId);
-                        }, 2000);
-                    } else if (tagUrl) {
-                        // Tag'de link var ama profil ID yok - atama yapılabilir
-                        contentDiv.innerHTML = `
-                            <div class="space-y-3">
-                                <div class="p-3 bg-blue-50 border border-blue-200 rounded">
-                                    <p class="text-sm font-semibold text-blue-800 mb-1">NFC Tag'inde Link Bulundu:</p>
-                                    <p class="text-xs text-blue-600 break-all">${tagUrl}</p>
-                                </div>
-                                <div class="text-center">
-                                    <button onclick="showNfcAssignModal('${serialNumber}', '${tagUrl}')" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
-                                        <i class="fas fa-plus mr-1"></i>Bu Link'e Hayvan Profili Ata
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                        
-                        showMessage('NFC tag\'inde link bulundu - Hayvan profili atayabilirsiniz!', 'info');
-                        
-                        // Otomatik olarak atama modalını aç
-                        setTimeout(() => {
-                            showNfcAssignModal(serialNumber, tagUrl);
-                        }, 1500);
-                    } else {
-                        // Tag tamamen boş
-                        contentDiv.innerHTML = `
-                            <div class="text-center">
-                                <div class="text-orange-600 mb-3">
-                                    <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                                    <p>Tag boş - İçerik bulunamadı</p>
-                                </div>
-                                <p class="text-sm text-gray-600 mb-3">Bu tag'e önce bir link yazmanız gerekiyor</p>
-                                <button onclick="showEmptyTagModal('${serialNumber}')" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
-                                    <i class="fas fa-edit mr-1"></i>Link Yaz ve Hayvan Ata
-                                </button>
-                            </div>
-                        `;
-                        
-                        showMessage('NFC tag boş - Önce link yazmanız gerekiyor', 'info');
-                    }
-                    
+                    contentDiv.textContent = content;
                     resultDiv.classList.remove('hidden');
+                    
+                    showMessage('NFC tag başarıyla okundu!', 'success');
                 });
 
                 nfcReader.addEventListener('readingerror', () => {
@@ -643,7 +571,7 @@
             if (customUrlCheck && customUrl) {
                 urlToWrite = customUrl;
             } else if (profileId) {
-                urlToWrite = `${window.location.origin}?profile=${profileId}`;
+                urlToWrite = `${getBaseUrl()}?profile=${profileId}`;
             } else {
                 showMessage('Lütfen profil seçin veya özel URL girin', 'error');
                 return;
@@ -665,28 +593,14 @@
                 });
                 
                 loading.classList.remove('show');
-                contentDiv.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span>Yazılan URL: ${urlToWrite}</span>
-                        <button onclick="openNfcProfile('${profileId}')" class="ml-2 bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
-                            <i class="fas fa-eye mr-1"></i>Profili Aç
-                        </button>
-                    </div>
-                `;
+                contentDiv.textContent = `Yazılan URL: ${urlToWrite}`;
                 resultDiv.classList.remove('hidden');
                 
-                showMessage('NFC tag başarıyla yazıldı! Profil sayfası açılıyor...', 'success');
+                showMessage('NFC tag başarıyla yazıldı!', 'success');
                 
                 // Firebase'e NFC kaydını ekle
                 if (profileId && !customUrlCheck) {
                     await saveNfcRecord(profileId, urlToWrite);
-                }
-                
-                // 2 saniye sonra profil sayfasını aç
-                if (profileId && !customUrlCheck) {
-                    setTimeout(() => {
-                        openNfcProfile(profileId);
-                    }, 2000);
                 }
                 
             } catch (error) {
@@ -737,205 +651,7 @@
             }
         }
 
-        // NFC Atama Modalını Göster
-        function showNfcAssignModal(tagId, existingUrl = null) {
-            const modal = document.getElementById('nfcAssignModal');
-            const tagIdSpan = document.getElementById('nfcTagId');
-            const tagStatusSpan = document.getElementById('nfcTagStatus');
-            const assignSelect = document.getElementById('assignProfileSelect');
-            
-            // Tag bilgilerini güncelle
-            tagIdSpan.textContent = tagId || 'Bilinmiyor';
-            
-            if (existingUrl) {
-                tagStatusSpan.innerHTML = `<span class="text-blue-600">Link Mevcut - Hayvan Atanabilir</span>`;
-                // Mevcut URL'i kaydet
-                window.currentNfcTagUrl = existingUrl;
-            } else {
-                tagStatusSpan.textContent = 'Boş - Atama Bekliyor';
-            }
-            
-            // Kullanıcının profillerini yükle
-            assignSelect.innerHTML = '<option value="">Profil Seçin</option>' + 
-                allProfiles.map(profile => 
-                    `<option value="${profile.id}">${profile.petName} (${profile.petType})</option>`
-                ).join('');
-            
-            modal.classList.remove('hidden');
-        }
-
-        // NFC Yeniden Atama Modalını Göster
-        function showNfcReassignModal(tagId, existingUrl) {
-            showNfcAssignModal(tagId, existingUrl);
-            
-            // Modal başlığını değiştir
-            const modalTitle = document.querySelector('#nfcAssignModal h3');
-            modalTitle.innerHTML = '<i class="fas fa-sync mr-2 text-blue-600"></i>NFC Tag\'e Farklı Hayvan Ata';
-            
-            // Durum metnini güncelle
-            const tagStatusSpan = document.getElementById('nfcTagStatus');
-            tagStatusSpan.innerHTML = '<span class="text-green-600">Mevcut Atama Değiştiriliyor</span>';
-        }
-
-        // Boş Tag Modal Göster
-        function showEmptyTagModal(tagId) {
-            // Önce normal atama modalını göster
-            showNfcAssignModal(tagId);
-            
-            // Modal başlığını değiştir
-            const modalTitle = document.querySelector('#nfcAssignModal h3');
-            modalTitle.innerHTML = '<i class="fas fa-edit mr-2 text-purple-600"></i>NFC Tag\'e Link Yaz ve Hayvan Ata';
-            
-            // Durum metnini güncelle
-            const tagStatusSpan = document.getElementById('nfcTagStatus');
-            tagStatusSpan.innerHTML = '<span class="text-purple-600">Boş Tag - Link Yazılacak</span>';
-            
-            // Ek bilgi ekle
-            const nfcTagInfo = document.getElementById('nfcTagInfo');
-            nfcTagInfo.innerHTML = `
-                <p class="text-sm"><strong>Tag ID:</strong> <span id="nfcTagId">${tagId}</span></p>
-                <p class="text-sm"><strong>Durum:</strong> <span class="text-purple-600">Boş - Link yazılacak ve hayvan atanacak</span></p>
-                <div class="mt-2 p-2 bg-purple-50 border border-purple-200 rounded">
-                    <p class="text-xs text-purple-700">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Bu tag'e otomatik olarak site linki yazılacak ve seçtiğiniz hayvan profili atanacak
-                    </p>
-                </div>
-            `;
-        }
-
-        // NFC Atama İşlemi
-        async function assignNfcTag() {
-            const profileId = document.getElementById('assignProfileSelect').value;
-            const tagId = window.currentNfcTagId;
-            const existingUrl = window.currentNfcTagUrl;
-            
-            if (!profileId) {
-                showMessage('Lütfen bir profil seçin', 'error');
-                return;
-            }
-
-            const loading = document.getElementById('assignLoading');
-            loading.classList.add('show');
-
-            try {
-                let finalUrl;
-                
-                if (existingUrl) {
-                    // Mevcut URL'i kullan ve profil parametresi ekle/güncelle
-                    try {
-                        const url = new URL(existingUrl);
-                        url.searchParams.set('profile', profileId);
-                        finalUrl = url.toString();
-                    } catch (e) {
-                        // URL parse edilemezse site URL'i kullan
-                        finalUrl = `${window.location.origin}?profile=${profileId}`;
-                    }
-                } else {
-                    // Yeni URL oluştur
-                    finalUrl = `${window.location.origin}?profile=${profileId}`;
-                }
-                
-                // iPhone kontrolü - sadece okuma yapabilir, yazma yapamaz
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                
-                if (isIOS) {
-                    // iPhone'da sadece veritabanına kaydet, NFC yazma yapma
-                    await saveNfcAssignment(tagId, profileId, finalUrl, 'ios_read_only');
-                    
-                    loading.classList.remove('show');
-                    document.getElementById('nfcAssignModal').classList.add('hidden');
-                    
-                    showMessage('iPhone\'da NFC yazma desteklenmiyor. Link veritabanına kaydedildi. Android cihazla tag\'i yazabilirsiniz.', 'info');
-                    
-                    // Profili otomatik aç
-                    setTimeout(() => {
-                        openNfcProfile(profileId);
-                    }, 2000);
-                } else {
-                    // Android'de NFC tag'e yaz
-                    await nfcWriter.write({
-                        records: [{
-                            recordType: "url",
-                            data: finalUrl
-                        }]
-                    });
-                    
-                    // Firebase'e NFC atamasını kaydet
-                    await saveNfcAssignment(tagId, profileId, finalUrl, 'android_written');
-                    
-                    loading.classList.remove('show');
-                    document.getElementById('nfcAssignModal').classList.add('hidden');
-                    
-                    showMessage('NFC tag\'ine hayvan profili başarıyla yazıldı ve atandı!', 'success');
-                    
-                    // Profili otomatik aç
-                    setTimeout(() => {
-                        openNfcProfile(profileId);
-                    }, 1500);
-                }
-                
-            } catch (error) {
-                loading.classList.remove('show');
-                console.error('NFC atama hatası:', error);
-                
-                if (error.name === 'NotAllowedError') {
-                    showMessage('NFC izni reddedildi. Lütfen tarayıcı ayarlarından NFC iznini verin.', 'error');
-                } else if (error.name === 'NotSupportedError') {
-                    showMessage('Bu cihaz NFC yazma desteklemiyor', 'error');
-                } else {
-                    showMessage('NFC atama hatası: ' + error.message, 'error');
-                }
-            }
-        }
-
-        // NFC Atamasını Firebase'e Kaydet
-        async function saveNfcAssignment(tagId, profileId, url, assignmentType = 'auto') {
-            try {
-                const nfcAssignment = {
-                    tagId: tagId,
-                    profileId: profileId,
-                    url: url,
-                    assignedBy: currentUser.uid,
-                    assignedAt: new Date().toISOString(),
-                    isActive: true,
-                    assignmentType: assignmentType, // 'auto', 'ios_read_only', 'android_written'
-                    deviceType: /iPad|iPhone|iPod/.test(navigator.userAgent) ? 'ios' : 'android',
-                    userAgent: navigator.userAgent,
-                    location: userLocation
-                };
-
-                // Önce aynı tag ID'si ile mevcut kayıt var mı kontrol et
-                const existingQuery = window.firebaseServices.query(
-                    window.firebaseServices.collection(window.firebaseDb, 'nfc_assignments'),
-                    window.firebaseServices.where('tagId', '==', tagId),
-                    window.firebaseServices.where('isActive', '==', true)
-                );
-                
-                const existingDocs = await window.firebaseServices.getDocs(existingQuery);
-                
-                // Mevcut kayıtları pasif yap
-                for (const doc of existingDocs.docs) {
-                    await window.firebaseServices.updateDoc(doc.ref, {
-                        isActive: false,
-                        deactivatedAt: new Date().toISOString(),
-                        deactivatedBy: currentUser.uid
-                    });
-                }
-
-                // Yeni kaydı ekle
-                await window.firebaseServices.addDoc(
-                    window.firebaseServices.collection(window.firebaseDb, 'nfc_assignments'),
-                    nfcAssignment
-                );
-                
-                console.log('NFC ataması Firebase\'e kaydedildi:', assignmentType);
-            } catch (error) {
-                console.error('NFC ataması Firebase\'e kaydedilirken hata:', error);
-            }
-        }
-
-        // NFC Kaydını Firebase'e Kaydet (Eski fonksiyon - uyumluluk için)
+        // NFC Kaydını Firebase'e Kaydet
         async function saveNfcRecord(profileId, url) {
             try {
                 const nfcRecord = {
@@ -963,7 +679,7 @@
             const urlInput = document.getElementById('generatedUrl');
             
             if (profileId) {
-                const url = `${window.location.origin}?profile=${profileId}`;
+                const url = `${getBaseUrl()}?profile=${profileId}`;
                 urlInput.value = url;
             } else {
                 urlInput.value = '';
@@ -1164,7 +880,7 @@
                             </div>
                         </div>
                         <div class="text-xs text-gray-500 break-all">
-                            Profil Linki: ${window.location.origin}?profile=${profile.id}
+                            Profil Linki: ${getBaseUrl()}?profile=${profile.id}
                         </div>
                         <button onclick="copyProfileLink('${profile.id}')" class="text-xs text-purple-600 hover:text-purple-800 mt-1">
                             <i class="fas fa-copy mr-1"></i>Linki Kopyala
@@ -1412,7 +1128,12 @@
                           profile.petType === 'Tavşan' ? '🐰' : '🐾'}
                     </div>
                     <h1 class="text-3xl font-bold text-gray-800 mb-2">${profile.petName}</h1>
-                    <p class="text-gray-600">${profile.petType}${profile.breed ? ' - ' + profile.breed : ''}</p>
+                    <p class="text-gray-600 mb-4">${profile.petType}${profile.breed ? ' - ' + profile.breed : ''}</p>
+                    
+                    <!-- Konum Gönder Butonu - Herkese Görünür -->
+                    <button onclick="shareLocation()" class="bg-green-500 text-white px-6 py-3 rounded-lg font-bold text-lg hover:bg-green-600 shadow-lg transform hover:scale-105 transition-all duration-200">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Konum Gönder
+                    </button>
                 </div>
 
                 <div class="grid gap-6 md:grid-cols-2">
@@ -1480,12 +1201,14 @@
                 ` : ''}
             `;
 
-            // İstatistikleri göster (sadece profil sahibi görebilir)
+            // İstatistikleri ve düzenle butonunu göster (sadece profil sahibi görebilir)
             if (currentUser && profile.userId === currentUser.uid) {
                 document.getElementById('profileStats').classList.remove('hidden');
+                document.getElementById('editProfileBtn').classList.remove('hidden');
                 updateProfileStats(profile);
             } else {
                 document.getElementById('profileStats').classList.add('hidden');
+                document.getElementById('editProfileBtn').classList.add('hidden');
             }
         }
 
@@ -1556,78 +1279,43 @@
                     <p class="font-semibold">Konumunuz alındı!</p>
                     <p class="text-sm text-gray-600">Harita uygulamasını seçin:</p>
                 </div>
-                <div class="grid gap-2">
-                    <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" rel="noopener noreferrer" 
-                       class="flex items-center justify-center bg-blue-500 text-white p-3 rounded hover:bg-blue-600">
-                        <i class="fas fa-map mr-2"></i>Google Maps
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="https://maps.google.com/?q=${lat},${lng}" target="_blank" rel="noopener noreferrer" class="bg-blue-500 text-white p-3 rounded-lg text-center hover:bg-blue-600">
+                        <i class="fab fa-google text-xl mb-1"></i>
+                        <div class="text-sm">Google Maps</div>
                     </a>
-                    <a href="https://maps.apple.com/?q=${lat},${lng}" target="_blank" rel="noopener noreferrer"
-                       class="flex items-center justify-center bg-gray-800 text-white p-3 rounded hover:bg-gray-900">
-                        <i class="fas fa-map mr-2"></i>Apple Maps
+                    <a href="https://www.yandex.com.tr/harita/?ll=${lng},${lat}&z=15" target="_blank" rel="noopener noreferrer" class="bg-red-500 text-white p-3 rounded-lg text-center hover:bg-red-600">
+                        <i class="fas fa-map text-xl mb-1"></i>
+                        <div class="text-sm">Yandex Harita</div>
                     </a>
-                    <a href="https://waze.com/ul?ll=${lat},${lng}" target="_blank" rel="noopener noreferrer"
-                       class="flex items-center justify-center bg-blue-400 text-white p-3 rounded hover:bg-blue-500">
-                        <i class="fas fa-route mr-2"></i>Waze
+                    <a href="https://waze.com/ul?ll=${lat},${lng}&navigate=yes" target="_blank" rel="noopener noreferrer" class="bg-purple-500 text-white p-3 rounded-lg text-center hover:bg-purple-600">
+                        <i class="fas fa-route text-xl mb-1"></i>
+                        <div class="text-sm">Waze</div>
                     </a>
+                    <button onclick="copyLocationText('${lat}', '${lng}')" class="bg-gray-500 text-white p-3 rounded-lg text-center hover:bg-gray-600">
+                        <i class="fas fa-copy text-xl mb-1"></i>
+                        <div class="text-sm">Koordinat Kopyala</div>
+                    </button>
                 </div>
             `;
         }
 
-        // NFC Profil Açma
-        async function openNfcProfile(profileId) {
-            if (!profileId) return;
-            
-            try {
-                // Profili Firebase'den getir
-                const docRef = window.firebaseServices.doc(window.firebaseDb, 'pets', profileId);
-                const docSnap = await window.firebaseServices.getDoc(docRef);
-                
-                if (docSnap.exists()) {
-                    const profile = { id: docSnap.id, ...docSnap.data() };
-                    currentProfile = profile;
-                    displayProfile(profile);
-                    showPage('viewProfilePage');
-                    
-                    // Admin panelinden geldiği için geri butonu göster
-                    document.getElementById('backFromViewBtn').style.display = 'block';
-                    
-                    showMessage(`${profile.petName} profili açıldı!`, 'success');
-                } else {
-                    showMessage('Profil bulunamadı', 'error');
-                }
-            } catch (error) {
-                console.error('NFC profil açma hatası:', error);
-                showMessage('Profil açılırken hata oluştu', 'error');
-            }
+        function copyLocationText(lat, lng) {
+            const locationText = `Konum: ${lat}, ${lng}\nGoogle Maps: https://maps.google.com/?q=${lat},${lng}`;
+            navigator.clipboard.writeText(locationText).then(() => {
+                showMessage('Konum bilgisi kopyalandı!', 'success');
+            });
         }
 
-        // Yardımcı fonksiyonlar
+        // Profil linki kopyalama
         function copyProfileLink(profileId) {
-            const link = `${window.location.origin}?profile=${profileId}`;
+            const link = `${getBaseUrl()}?profile=${profileId}`;
             navigator.clipboard.writeText(link).then(() => {
                 showMessage('Profil linki kopyalandı!', 'success');
             });
         }
 
-        function showMessage(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${
-                type === 'success' ? 'bg-green-500' : 
-                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-            }`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        }
-
-        // Ek alan ekleme
+        // Özel alan ekleme
         function addCustomField() {
             customFieldCounter++;
             const container = document.getElementById('customFields');
@@ -1636,175 +1324,44 @@
             fieldDiv.innerHTML = `
                 <input type="text" placeholder="Alan adı" class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
                 <input type="text" placeholder="Değer" class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
-                <button type="button" onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-800 px-2">
+                <button type="button" onclick="removeCustomField(this)" class="text-red-600 hover:text-red-800 px-2">
                     <i class="fas fa-trash"></i>
                 </button>
             `;
             container.appendChild(fieldDiv);
         }
 
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', async () => {
-            // SDK'ları başlat
-            if (window.dataSdk) {
-                const initResult = await window.dataSdk.init(dataHandler);
-                if (!initResult.isOk) {
-                    console.error('Data SDK başlatılamadı');
-                }
-            }
+        function removeCustomField(button) {
+            button.parentElement.remove();
+        }
 
-            if (window.elementSdk) {
-                await window.elementSdk.init(element);
-            }
-
-            // Konum bilgisini al
-            await getUserLocation();
-
-            // NFC desteğini kontrol et
-            await checkNfcSupport();
-
-            // URL'den profil kontrolü
-            const urlParams = new URLSearchParams(window.location.search);
-            const profileId = urlParams.get('profile');
+        // Mesaj gösterme
+        function showMessage(message, type = 'info') {
+            // Basit toast mesajı
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+            }`;
+            toast.textContent = message;
             
-            if (profileId) {
-                // Profil görüntüleme modunda başlat
-                setTimeout(async () => {
-                    await viewProfile(profileId);
-                    // Geri butonu gizle (dış bağlantıdan geldiği için)
-                    document.getElementById('backFromViewBtn').style.display = 'none';
-                }, 2000);
-                return;
-            }
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
 
-            // Firebase Auth durumu kontrolü
-            window.firebaseServices.onAuthStateChanged(window.firebaseAuth, async (user) => {
-                if (user) {
-                    currentUser = user;
-                    document.getElementById('userNameDisplay').textContent = user.email.split('@')[0];
-                    
-                    if (isAdmin()) {
-                        document.getElementById('adminPanel').classList.remove('hidden');
-                    }
-                    
-                    await loadUserProfiles();
-                    showPage('homePage');
-                } else {
-                    currentUser = null;
-                    allProfiles = [];
-                    showPage('loginPage');
-                }
-            });
-
-            // Form event listeners
-            document.getElementById('showRegisterBtn').addEventListener('click', () => {
-                document.getElementById('loginForm').classList.add('hidden');
-                document.getElementById('registerForm').classList.remove('hidden');
-            });
-
-            document.getElementById('showLoginBtn').addEventListener('click', () => {
-                document.getElementById('registerForm').classList.add('hidden');
-                document.getElementById('loginForm').classList.remove('hidden');
-            });
-
-            // Giriş formu
-            document.getElementById('loginBtn').addEventListener('click', async () => {
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                
-                if (!email || !password) {
-                    showMessage('Lütfen tüm alanları doldurun', 'error');
-                    return;
-                }
-
-                const loading = document.getElementById('loginLoading');
-                loading.classList.add('show');
-
-                try {
-                    const userCredential = await window.firebaseServices.signInWithEmailAndPassword(
-                        window.firebaseAuth, email, password
-                    );
-                    
-                    currentUser = userCredential.user;
-                    document.getElementById('userNameDisplay').textContent = currentUser.email.split('@')[0];
-                    
-                    if (isAdmin()) {
-                        document.getElementById('adminPanel').classList.remove('hidden');
-                    }
-                    
-                    await loadUserProfiles();
-                    
-                    loading.classList.remove('show');
-                    showPage('homePage');
-                    showMessage('Başarıyla giriş yaptınız!', 'success');
-                } catch (error) {
-                    loading.classList.remove('show');
-                    console.error('Giriş hatası:', error);
-                    showMessage('Giriş yapılırken hata oluştu: ' + error.message, 'error');
-                }
-            });
-
-            // Kayıt formu
-            document.getElementById('registerBtn').addEventListener('click', async () => {
-                const name = document.getElementById('registerName').value;
-                const email = document.getElementById('registerEmail').value;
-                const phone = document.getElementById('registerPhone').value;
-                const password = document.getElementById('registerPassword').value;
-                
-                if (!name || !email || !phone || !password) {
-                    showMessage('Lütfen tüm alanları doldurun', 'error');
-                    return;
-                }
-
-                const loading = document.getElementById('registerLoading');
-                loading.classList.add('show');
-
-                try {
-                    // Konum bilgisini al
-                    await getUserLocation();
-                    
-                    const userCredential = await window.firebaseServices.createUserWithEmailAndPassword(
-                        window.firebaseAuth, email, password
-                    );
-                    
-                    currentUser = userCredential.user;
-                    
-                    // Kullanıcı bilgilerini Firestore'a kaydet
-                    await saveUserToFirestore(currentUser, { name, phone });
-                    
-                    document.getElementById('userNameDisplay').textContent = name;
-                    
-                    loading.classList.remove('show');
-                    showPage('homePage');
-                    showMessage('Hesabınız başarıyla oluşturuldu!', 'success');
-                } catch (error) {
-                    loading.classList.remove('show');
-                    console.error('Kayıt hatası:', error);
-                    showMessage('Hesap oluşturulurken hata oluştu: ' + error.message, 'error');
-                }
-            });
-
-            // Çıkış
-            document.getElementById('logoutBtn').addEventListener('click', logout);
-
-            // Profil ekleme
-            document.getElementById('addProfileBtn').addEventListener('click', () => {
-                currentProfile = null;
-                document.getElementById('profileForm').reset();
-                document.getElementById('customFields').innerHTML = '';
-                customFieldCounter = 0;
-                showPage('profilePage');
-            });
-
-            // Profil formu
-            document.getElementById('profileForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const loading = document.getElementById('saveLoading');
-                loading.classList.add('show');
-
+        // Form gönderme
+        async function saveProfile(event) {
+            event.preventDefault();
+            
+            const loading = document.getElementById('saveLoading');
+            loading.classList.add('show');
+            
+            try {
                 const profileData = {
-                    userId: currentUser.uid,
                     petName: document.getElementById('petName').value,
                     petType: document.getElementById('petType').value,
                     breed: document.getElementById('breed').value,
@@ -1824,47 +1381,163 @@
                     allergies: document.getElementById('allergies').value,
                     medications: document.getElementById('medications').value,
                     microchipId: document.getElementById('microchipId').value,
-                    isActive: true,
-                    createdAt: currentProfile ? currentProfile.createdAt : new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    // İstatistik alanları - sadece yeni profil için sıfırla
-                    viewCount: currentProfile ? currentProfile.viewCount : 0,
-                    phoneClickCount: currentProfile ? currentProfile.phoneClickCount : 0,
-                    emailClickCount: currentProfile ? currentProfile.emailClickCount : 0,
-                    locationShareCount: currentProfile ? currentProfile.locationShareCount : 0,
-                    lastViewedAt: currentProfile ? currentProfile.lastViewedAt : null
+                    userId: currentUser.uid,
+                    updatedAt: new Date().toISOString()
                 };
 
-                try {
-                    if (currentProfile) {
-                        // Güncelleme
-                        await window.firebaseServices.updateDoc(
-                            window.firebaseServices.doc(window.firebaseDb, 'pets', currentProfile.id),
-                            profileData
-                        );
-                        showMessage('Profil güncellendi!', 'success');
-                    } else {
-                        // Yeni profil
-                        await window.firebaseServices.addDoc(
-                            window.firebaseServices.collection(window.firebaseDb, 'pets'),
-                            profileData
-                        );
-                        showMessage('Profil oluşturuldu!', 'success');
+                if (currentProfile && currentProfile.id) {
+                    // Güncelleme
+                    await window.firebaseServices.updateDoc(
+                        window.firebaseServices.doc(window.firebaseDb, 'pets', currentProfile.id),
+                        profileData
+                    );
+                    showMessage('Profil başarıyla güncellendi!', 'success');
+                } else {
+                    // Yeni ekleme
+                    profileData.createdAt = new Date().toISOString();
+                    profileData.viewCount = 0;
+                    profileData.phoneClickCount = 0;
+                    profileData.emailClickCount = 0;
+                    profileData.locationShareCount = 0;
+                    
+                    await window.firebaseServices.addDoc(
+                        window.firebaseServices.collection(window.firebaseDb, 'pets'),
+                        profileData
+                    );
+                    showMessage('Profil başarıyla oluşturuldu!', 'success');
+                }
+                
+                loading.classList.remove('show');
+                loadUserProfiles();
+                showPage('homePage');
+                
+            } catch (error) {
+                loading.classList.remove('show');
+                console.error('Profil kaydedilirken hata:', error);
+                showMessage('Profil kaydedilirken hata oluştu', 'error');
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Firebase'in yüklenmesini bekle
+            const firebaseReady = await waitForFirebase();
+            if (!firebaseReady) {
+                showMessage('Firebase yüklenemedi', 'error');
+                return;
+            }
+
+            // Konum bilgisini al
+            await getUserLocation();
+
+            // NFC desteğini kontrol et
+            await checkNfcSupport();
+
+            // Element SDK'yı başlat
+            if (window.elementSdk) {
+                await window.elementSdk.init(element);
+            }
+
+            // URL'den profil ID'sini kontrol et
+            const urlParams = new URLSearchParams(window.location.search);
+            const profileId = urlParams.get('profile');
+            
+            if (profileId) {
+                // Direkt profil görüntüleme
+                await viewProfile(profileId);
+                return;
+            }
+
+            // Auth state listener
+            window.firebaseServices.onAuthStateChanged(window.firebaseAuth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('userNameDisplay').textContent = user.email;
+                    
+                    // Admin panelini göster/gizle
+                    if (isAdmin()) {
+                        document.getElementById('adminPanel').classList.remove('hidden');
                     }
                     
-                    loading.classList.remove('show');
-                    await loadUserProfiles(); // Listeyi yenile
+                    await loadUserProfiles();
                     showPage('homePage');
-                } catch (error) {
-                    loading.classList.remove('show');
-                    console.error('Profil kaydetme hatası:', error);
-                    showMessage('Profil kaydedilirken hata oluştu: ' + error.message, 'error');
+                } else {
+                    currentUser = null;
+                    showPage('loginPage');
                 }
             });
 
-            // Diğer event listeners
-            document.getElementById('cancelProfileBtn').addEventListener('click', () => {
-                showPage('homePage');
+            // Login form
+            document.getElementById('loginBtn').addEventListener('click', async () => {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                if (!email || !password) {
+                    showMessage('Lütfen tüm alanları doldurun', 'error');
+                    return;
+                }
+                
+                const loading = document.getElementById('loginLoading');
+                loading.classList.add('show');
+                
+                try {
+                    await window.firebaseServices.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                    showMessage('Giriş başarılı!', 'success');
+                } catch (error) {
+                    console.error('Giriş hatası:', error);
+                    showMessage('Giriş yapılamadı: ' + error.message, 'error');
+                } finally {
+                    loading.classList.remove('show');
+                }
+            });
+
+            // Register form
+            document.getElementById('registerBtn').addEventListener('click', async () => {
+                const name = document.getElementById('registerName').value;
+                const email = document.getElementById('registerEmail').value;
+                const phone = document.getElementById('registerPhone').value;
+                const password = document.getElementById('registerPassword').value;
+                
+                if (!name || !email || !password) {
+                    showMessage('Lütfen zorunlu alanları doldurun', 'error');
+                    return;
+                }
+                
+                const loading = document.getElementById('registerLoading');
+                loading.classList.add('show');
+                
+                try {
+                    const userCredential = await window.firebaseServices.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+                    await saveUserToFirestore(userCredential.user, { name, phone });
+                    showMessage('Hesap başarıyla oluşturuldu!', 'success');
+                } catch (error) {
+                    console.error('Kayıt hatası:', error);
+                    showMessage('Hesap oluşturulamadı: ' + error.message, 'error');
+                } finally {
+                    loading.classList.remove('show');
+                }
+            });
+
+            // Form toggle
+            document.getElementById('showRegisterBtn').addEventListener('click', () => {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerForm').classList.remove('hidden');
+            });
+
+            document.getElementById('showLoginBtn').addEventListener('click', () => {
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('loginForm').classList.remove('hidden');
+            });
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+
+            // Profile actions
+            document.getElementById('addProfileBtn').addEventListener('click', () => {
+                currentProfile = null;
+                document.getElementById('profileForm').reset();
+                document.getElementById('customFields').innerHTML = '';
+                showPage('profilePage');
             });
 
             document.getElementById('backToHomeBtn').addEventListener('click', () => {
@@ -1872,9 +1545,22 @@
             });
 
             document.getElementById('backFromViewBtn').addEventListener('click', () => {
+                if (currentUser) {
+                    showPage('homePage');
+                } else {
+                    showPage('loginPage');
+                }
+            });
+
+            document.getElementById('cancelProfileBtn').addEventListener('click', () => {
                 showPage('homePage');
             });
 
+            document.getElementById('profileForm').addEventListener('submit', saveProfile);
+
+            document.getElementById('addCustomFieldBtn').addEventListener('click', addCustomField);
+
+            // Profile view actions
             document.getElementById('editProfileBtn').addEventListener('click', () => {
                 if (currentProfile) {
                     fillProfileForm(currentProfile);
@@ -1888,42 +1574,15 @@
                 document.getElementById('locationModal').classList.add('hidden');
             });
 
-            // NFC Atama Modal Event Listeners
-            document.getElementById('cancelAssignBtn').addEventListener('click', () => {
-                document.getElementById('nfcAssignModal').classList.add('hidden');
-            });
-
-            document.getElementById('confirmAssignBtn').addEventListener('click', assignNfcTag);
-
-            document.getElementById('addCustomFieldBtn').addEventListener('click', addCustomField);
-
-            // NFC Event Listeners
+            // NFC Actions
             document.getElementById('readNfcBtn').addEventListener('click', readNfcTag);
             document.getElementById('writeNfcBtn').addEventListener('click', writeNfcTag);
             document.getElementById('clearNfcBtn').addEventListener('click', clearNfcTag);
-            
-            // Profil seçimi değiştiğinde URL güncelle
+
+            // Profile select change
             document.getElementById('profileSelect').addEventListener('change', updateGeneratedUrl);
-            
-            // Özel URL checkbox kontrolü
             document.getElementById('customUrlCheck').addEventListener('change', toggleCustomUrl);
         });
-
-        // Global fonksiyonlar (onclick için)
-        window.viewProfile = viewProfile;
-        window.editProfile = editProfile;
-        window.deleteProfile = deleteProfile;
-        window.confirmDelete = confirmDelete;
-        window.cancelDelete = cancelDelete;
-        window.copyProfileLink = copyProfileLink;
-        window.openNfcProfile = openNfcProfile;
-        window.showNfcAssignModal = showNfcAssignModal;
-        window.showNfcReassignModal = showNfcReassignModal;
-        window.showEmptyTagModal = showEmptyTagModal;
-        window.assignNfcTag = assignNfcTag;
-        window.trackPhoneClick = trackPhoneClick;
-        window.trackEmailClick = trackEmailClick;
-        window.trackLocationShare = trackLocationShare;
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991be91e873650ed',t:'MTc2MDk5ODkxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991c14be85fa2a87',t:'MTc2MTAwMDY5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
