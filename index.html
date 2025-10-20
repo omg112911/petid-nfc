@@ -87,7 +87,34 @@
        🐾
       </div>
       <h1 id="appTitle" class="text-3xl font-bold text-gray-800 mb-2">PatiLink</h1>
-      <p id="welcomeMessage" class="text-gray-600">Evcil hayvanınız için dijital kimlik</p>
+      <p id="welcomeMessage" class="text-gray-600 mb-6">Evcil hayvanınız için dijital kimlik</p><!-- Ürün Tanıtımı -->
+      <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6 mb-6 text-left">
+       <h2 class="text-xl font-bold text-gray-800 mb-4 text-center"><i class="fas fa-star text-yellow-500 mr-2"></i>PatiLink Nedir?</h2>
+       <div class="space-y-4 text-sm text-gray-700">
+        <div class="flex items-start"><i class="fas fa-wifi text-purple-600 mr-3 mt-1"></i>
+         <div><strong>NFC Teknolojisi:</strong> Evcil hayvanınızın tasmasına takılan NFC tag ile anında dijital kimlik bilgilerine erişim
+         </div>
+        </div>
+        <div class="flex items-start"><i class="fas fa-mobile-alt text-blue-600 mr-3 mt-1"></i>
+         <div><strong>Kolay Erişim:</strong> Telefonu yaklaştırarak tüm bilgilere anında ulaşım
+         </div>
+        </div>
+        <div class="flex items-start"><i class="fas fa-map-marker-alt text-green-600 mr-3 mt-1"></i>
+         <div><strong>Konum Paylaşımı:</strong> Kaybolma durumunda anında konum gönderme özelliği
+         </div>
+        </div>
+        <div class="flex items-start"><i class="fas fa-heartbeat text-red-600 mr-3 mt-1"></i>
+         <div><strong>Sağlık Bilgileri:</strong> Veteriner, ilaç ve alerji bilgilerini güvenle saklama
+         </div>
+        </div>
+        <div class="flex items-start"><i class="fas fa-chart-line text-orange-600 mr-3 mt-1"></i>
+         <div><strong>İstatistikler:</strong> Profil görüntülenme ve iletişim istatistikleri
+         </div>
+        </div>
+       </div><!-- İletişim Butonu -->
+       <div class="text-center mt-6"><button id="contactBtn" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transform hover:scale-105 transition-all duration-200 shadow-lg"> <i class="fas fa-phone mr-2"></i>Bilgi Al &amp; İletişim </button>
+       </div>
+      </div>
      </div>
      <div id="loginForm">
       <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Email</label> <input type="email" id="loginEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="email@example.com">
@@ -1582,7 +1609,15 @@
             // Profile select change
             document.getElementById('profileSelect').addEventListener('change', updateGeneratedUrl);
             document.getElementById('customUrlCheck').addEventListener('change', toggleCustomUrl);
+
+            // İletişim butonu
+            document.getElementById('contactBtn').addEventListener('click', () => {
+                // WhatsApp iletişim
+                const message = encodeURIComponent('Merhaba! PatiLink hakkında bilgi almak istiyorum. NFC teknolojisi ile evcil hayvan dijital kimlik sistemi hakkında detayları öğrenebilir miyim?');
+                const whatsappUrl = `https://wa.me/905551234567?text=${message}`;
+                window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            });
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991c14be85fa2a87',t:'MTc2MTAwMDY5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991c173c41062a87',t:'MTc2MTAwMDgwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
