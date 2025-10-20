@@ -3,17 +3,14 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PatiLink - Hayvan Dijital Kimlik Sistemi</title>
+  <title>PatiLink - Evcil Hayvan Dijital Kimlik</title>
   <script src="/_sdk/data_sdk.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
         body {
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .gradient-bg {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -21,333 +18,221 @@
         .card-shadow {
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
         .loading {
+            display: none;
+        }
+        .loading.show {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .custom-field {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-        }
-        .map-button {
-            background: #28a745;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            text-decoration: none;
-            margin: 5px;
-            display: inline-block;
-            font-size: 14px;
         }
     </style>
   <style>@view-transition { navigation: auto; }</style>
  </head>
- <body class="min-h-full bg-gray-50"><!-- Ana Konteyner -->
+ <body class="bg-gray-50 min-h-full"><!-- Ana Container -->
   <div id="app" class="min-h-full"><!-- Giriş Sayfası -->
    <div id="loginPage" class="min-h-full gradient-bg flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg card-shadow p-8 w-full max-w-md">
+    <div class="bg-white rounded-2xl card-shadow p-8 w-full max-w-md">
      <div class="text-center mb-8">
       <div class="text-4xl mb-4">
        🐾
       </div>
       <h1 id="appTitle" class="text-3xl font-bold text-gray-800 mb-2">PatiLink</h1>
-      <p id="welcomeMessage" class="text-gray-600">Hayvan dostlarınız için dijital kimlik</p>
+      <p id="welcomeMessage" class="text-gray-600">Evcil hayvanınız için dijital kimlik</p>
      </div>
-     <div id="authForms"><!-- Giriş Formu -->
-      <div id="loginForm">
-       <h2 class="text-xl font-semibold mb-4">Giriş Yap</h2>
-       <form id="loginFormElement">
-        <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2">E-posta</label> <input type="email" id="loginEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2">Şifre</label> <input type="password" id="loginPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div><button type="submit" id="loginBtn" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200"> Giriş Yap </button>
-       </form>
-       <p class="text-center mt-4 text-sm text-gray-600">Hesabınız yok mu? <button id="showRegister" class="text-blue-600 hover:underline">Kayıt Ol</button></p>
-      </div><!-- Kayıt Formu -->
-      <div id="registerForm" class="hidden">
-       <h2 class="text-xl font-semibold mb-4">Kayıt Ol</h2>
-       <form id="registerFormElement">
-        <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2">Ad Soyad</label> <input type="text" id="registerName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2">E-posta</label> <input type="email" id="registerEmail" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2">Şifre</label> <input type="password" id="registerPassword" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div><button type="submit" id="registerBtn" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition duration-200"> Kayıt Ol </button>
-       </form>
-       <p class="text-center mt-4 text-sm text-gray-600">Zaten hesabınız var mı? <button id="showLogin" class="text-blue-600 hover:underline">Giriş Yap</button></p>
+     <div id="loginForm">
+      <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Email</label> <input type="email" id="loginEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="email@example.com">
       </div>
+      <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Şifre</label> <input type="password" id="loginPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="••••••••">
+      </div><button id="loginBtn" class="w-full btn-primary text-white font-bold py-3 px-4 rounded-lg mb-4"> <i class="fas fa-spinner fa-spin loading" id="loginLoading"></i> Giriş Yap </button> <button id="showRegisterBtn" class="w-full text-purple-600 font-semibold py-2">Hesap Oluştur</button>
+     </div>
+     <div id="registerForm" class="hidden">
+      <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2">Ad Soyad</label> <input type="text" id="registerName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="Ad Soyad">
+      </div>
+      <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2">Email</label> <input type="email" id="registerEmail" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="email@example.com">
+      </div>
+      <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2">Telefon</label> <input type="tel" id="registerPhone" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="+90 555 123 45 67">
+      </div>
+      <div class="mb-6"><label class="block text-gray-700 text-sm font-bold mb-2">Şifre</label> <input type="password" id="registerPassword" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500" placeholder="••••••••">
+      </div><button id="registerBtn" class="w-full btn-primary text-white font-bold py-3 px-4 rounded-lg mb-4"> <i class="fas fa-spinner fa-spin loading" id="registerLoading"></i> Hesap Oluştur </button> <button id="showLoginBtn" class="w-full text-purple-600 font-semibold py-2">Giriş Yap</button>
      </div>
     </div>
    </div><!-- Ana Sayfa -->
-   <div id="mainPage" class="hidden min-h-full"><!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-4">
-       <div class="flex items-center"><span class="text-2xl mr-2">🐾</span>
-        <h1 class="text-2xl font-bold text-gray-900">PatiLink</h1>
-       </div>
-       <div class="flex items-center space-x-4">
-        <div id="sdkStatus" class="text-sm"><span class="text-yellow-600">🔄 Veri sistemi yükleniyor...</span>
-        </div><span id="userWelcome" class="text-gray-600"></span> <button id="logoutBtn" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-200"> Çıkış </button>
-       </div>
+   <div id="homePage" class="hidden min-h-full bg-gray-50"><!-- Header -->
+    <header class="gradient-bg text-white p-4">
+     <div class="flex justify-between items-center">
+      <div class="flex items-center"><span class="text-2xl mr-2">🐾</span>
+       <h1 class="text-xl font-bold">PatiLink</h1>
+      </div>
+      <div class="flex items-center space-x-4"><span id="userNameDisplay" class="text-sm"></span> <button id="logoutBtn" class="text-white hover:text-gray-200"> <i class="fas fa-sign-out-alt"></i> </button>
       </div>
      </div>
     </header><!-- Ana İçerik -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><!-- Profil Listesi -->
-     <div id="profilesList" class="mb-8">
-      <div class="flex justify-between items-center mb-6">
-       <h2 class="text-2xl font-bold text-gray-900">Hayvan Profillerim</h2><button id="addProfileBtn" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"> + Yeni Profil Ekle </button>
+    <main class="p-4"><!-- Profil Listesi -->
+     <div class="mb-6">
+      <div class="flex justify-between items-center mb-4">
+       <h2 class="text-2xl font-bold text-gray-800">Hayvan Profillerim</h2><button id="addProfileBtn" class="btn-primary text-white px-4 py-2 rounded-lg"> <i class="fas fa-plus mr-2"></i>Profil Ekle </button>
       </div>
-      <div id="profilesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- Profiller buraya eklenecek -->
+      <div id="profilesList" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"><!-- Profiller buraya eklenecek -->
       </div>
-     </div><!-- Admin NFC Yönetimi -->
-     <div id="adminSection" class="hidden mb-8">
-      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-       <h3 class="text-xl font-bold text-gray-900 mb-4">🔧 Admin - NFC Tag Yönetimi</h3><!-- NFC Link Oluşturma -->
-       <div class="mb-6 bg-white p-4 rounded-lg border">
-        <h4 class="text-lg font-semibold text-gray-800 mb-3">📱 NFC Link Oluştur</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-         <div><label class="block text-sm font-medium text-gray-700 mb-2">NFC Tag ID</label> <input type="text" id="newNfcTagId" placeholder="Örn: TAG001, PET123" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-         </div>
-         <div class="flex items-end"><button id="generateNfcLink" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200 w-full"> 🔗 Link Oluştur </button>
-         </div>
-        </div><!-- Oluşturulan Link -->
-        <div id="generatedLinkSection" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-         <h5 class="font-medium text-gray-800 mb-2">✅ NFC Linki Oluşturuldu:</h5>
-         <div class="flex items-center space-x-2 mb-3"><input type="text" id="generatedLink" readonly class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm"> <button id="copyNfcLink" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200"> 📋 Kopyala </button>
-         </div>
-         <div class="text-center">
-          <div id="qrCodeContainer" class="inline-block p-4 bg-white border rounded-lg">
-           <div class="text-6xl">
-            📱
-           </div>
-           <p class="text-xs text-gray-600 mt-2">QR Kod<br>
-            (Test için)</p>
-          </div>
-         </div>
-         <p class="text-xs text-gray-600 mt-2">💡 Bu linki NFC tag'e yazın. Kullanıcılar tag'i okudukunda bu sayfaya yönlendirilecek ve profillerini bağlayabilecek.</p>
-        </div>
-       </div><!-- Mevcut Profillere Atama -->
-       <div class="mb-6 bg-white p-4 rounded-lg border">
-        <h4 class="text-lg font-semibold text-gray-800 mb-3">🏷️ Mevcut Profillere NFC Ata</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-         <div><label class="block text-sm font-medium text-gray-700 mb-2">NFC Tag ID</label> <input type="text" id="nfcTagId" placeholder="NFC Tag ID girin" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-         </div>
-         <div><label class="block text-sm font-medium text-gray-700 mb-2">Profil Seç</label> <select id="profileSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"> <option value="">Profil seçin...</option> </select>
-         </div>
-        </div><button id="assignNfcBtn" class="mt-4 bg-orange-600 text-white px-6 py-2 rounded-md hover:bg-orange-700 transition duration-200"> NFC Tag'e Profil Ata </button>
-       </div><!-- Bekleyen NFC Tag'ler -->
-       <div class="bg-white p-4 rounded-lg border">
-        <h4 class="text-lg font-semibold text-gray-800 mb-3">⏳ Bekleyen NFC Tag'ler</h4>
-        <div id="pendingNfcTags" class="space-y-2"><!-- Bekleyen tag'ler buraya eklenecek -->
-        </div>
+     </div><!-- Admin Paneli -->
+     <div id="adminPanel" class="hidden bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <h3 class="text-lg font-bold text-red-800 mb-4"><i class="fas fa-shield-alt mr-2"></i>Admin Paneli</h3>
+      <div class="grid gap-4 md:grid-cols-2">
+       <div><label class="block text-red-700 text-sm font-bold mb-2">NFC Tag URL</label> <input type="url" id="nfcUrl" class="w-full px-3 py-2 border border-red-300 rounded focus:outline-none focus:border-red-500" placeholder="https://example.com/profile/123">
        </div>
-      </div>
-     </div>
-    </main>
-   </div><!-- NFC Atama Sayfası -->
-   <div id="nfcAssignPage" class="hidden min-h-full bg-gray-50">
-    <header class="bg-white shadow-sm border-b">
-     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-4"><button id="backFromNfc" class="flex items-center text-blue-600 hover:text-blue-800"> ← Ana Sayfaya Dön </button>
-       <h1 class="text-2xl font-bold text-gray-900">NFC Tag Atama</h1>
-       <div></div>
-      </div>
-     </div>
-    </header>
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-     <div class="bg-white rounded-lg card-shadow p-8">
-      <div class="text-center mb-8">
-       <div class="text-6xl mb-4">
-        🏷️
+       <div><label class="block text-red-700 text-sm font-bold mb-2">Yeni Profil Seç</label> <select id="profileSelect" class="w-full px-3 py-2 border border-red-300 rounded focus:outline-none focus:border-red-500"> <option value="">Profil Seçin</option> </select>
        </div>
-       <h2 class="text-2xl font-bold text-gray-900 mb-2">NFC Tag'inizi Atayın</h2>
-       <p class="text-gray-600">NFC Tag ID: <span id="currentNfcTagId" class="font-mono bg-gray-100 px-2 py-1 rounded"></span></p>
-      </div>
-      <div id="nfcProfileSelection">
-       <h3 class="text-lg font-semibold text-gray-900 mb-4">Hangi profile atamak istiyorsunuz?</h3>
-       <div id="nfcProfileList" class="space-y-3"><!-- Profil listesi buraya eklenecek -->
-       </div>
-       <div class="mt-6 pt-6 border-t border-gray-200">
-        <p class="text-gray-600 mb-4">Henüz profiliniz yok mu?</p><button id="createProfileForNfc" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200"> + Yeni Profil Oluştur ve NFC'ye Ata </button>
-       </div>
-      </div>
+      </div><button id="updateNfcBtn" class="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"> <i class="fas fa-spinner fa-spin loading" id="nfcLoading"></i> NFC Tag Güncelle </button>
      </div>
     </main>
    </div><!-- Profil Oluşturma/Düzenleme Sayfası -->
    <div id="profilePage" class="hidden min-h-full bg-gray-50">
-    <header class="bg-white shadow-sm border-b">
-     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-4"><button id="backToMain" class="flex items-center text-blue-600 hover:text-blue-800"> ← Ana Sayfaya Dön </button>
-       <h1 id="profilePageTitle" class="text-2xl font-bold text-gray-900">Yeni Profil Oluştur</h1>
-       <div></div>
-      </div>
+    <header class="gradient-bg text-white p-4">
+     <div class="flex items-center"><button id="backToHomeBtn" class="mr-4 text-white hover:text-gray-200"> <i class="fas fa-arrow-left text-xl"></i> </button>
+      <h1 class="text-xl font-bold">Hayvan Profili</h1>
      </div>
     </header>
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-     <form id="profileForm" class="bg-white rounded-lg card-shadow p-8"><!-- Temel Bilgiler -->
+    <main class="p-4">
+     <form id="profileForm" class="bg-white rounded-lg card-shadow p-6"><!-- Temel Bilgiler -->
       <div class="mb-8">
-       <h3 class="text-lg font-semibold text-gray-900 mb-4">🐕 Temel Bilgiler</h3>
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Hayvan Adı *</label> <input type="text" id="petName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+       <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-paw mr-2 text-purple-600"></i>Temel Bilgiler</h3>
+       <div class="grid gap-4 md:grid-cols-2">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Hayvan Adı *</label> <input type="text" id="petName" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Buddy">
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Hayvan Türü *</label> <select id="petType" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"> <option value="">Seçin...</option> <option value="Köpek">Köpek</option> <option value="Kedi">Kedi</option> <option value="Kuş">Kuş</option> <option value="Balık">Balık</option> <option value="Diğer">Diğer</option> </select>
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Tür *</label> <select id="petType" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500"> <option value="">Seçin</option> <option value="Köpek">Köpek</option> <option value="Kedi">Kedi</option> <option value="Kuş">Kuş</option> <option value="Balık">Balık</option> <option value="Hamster">Hamster</option> <option value="Tavşan">Tavşan</option> <option value="Diğer">Diğer</option> </select>
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Cins</label> <input type="text" id="breed" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Cins</label> <input type="text" id="breed" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Golden Retriever">
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Yaş</label> <input type="text" id="age" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Yaş</label> <input type="text" id="age" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="3 yaş">
+        </div>
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Ağırlık</label> <input type="text" id="weight" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="25 kg">
+        </div>
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Renk</label> <input type="text" id="color" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Altın sarısı">
         </div>
        </div>
       </div><!-- Sahip Bilgileri -->
       <div class="mb-8">
-       <h3 class="text-lg font-semibold text-gray-900 mb-4">👤 Sahip Bilgileri</h3>
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Sahip Adı *</label> <input type="text" id="ownerName" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+       <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-user mr-2 text-purple-600"></i>Sahip Bilgileri</h3>
+       <div class="grid gap-4 md:grid-cols-2">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Sahip Adı *</label> <input type="text" id="ownerName" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Ahmet Yılmaz">
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Telefon *</label> <input type="tel" id="ownerPhone" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Telefon *</label> <input type="tel" id="ownerPhone" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="+90 555 123 45 67">
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">E-posta</label> <input type="email" id="ownerEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Email</label> <input type="email" id="ownerEmail" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="ahmet@example.com">
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Adres</label> <input type="text" id="address" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Adres</label> <textarea id="ownerAddress" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Ev adresi"></textarea>
         </div>
        </div>
       </div><!-- Veteriner Bilgileri -->
       <div class="mb-8">
-       <h3 class="text-lg font-semibold text-gray-900 mb-4">🏥 Veteriner Bilgileri</h3>
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Veteriner Adı</label> <input type="text" id="vetName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+       <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-stethoscope mr-2 text-purple-600"></i>Veteriner Bilgileri</h3>
+       <div class="grid gap-4 md:grid-cols-2">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Veteriner Adı</label> <input type="text" id="vetName" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Dr. Mehmet Özkan">
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Veteriner Telefon</label> <input type="tel" id="vetPhone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Veteriner Telefon</label> <input type="tel" id="vetPhone" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="+90 555 987 65 43">
         </div>
-        <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-2">Veteriner Adresi</label> <input type="text" id="vetAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="md:col-span-2"><label class="block text-gray-700 text-sm font-bold mb-2">Veteriner Adres</label> <textarea id="vetAddress" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Veteriner kliniği adresi"></textarea>
         </div>
        </div>
       </div><!-- Acil Durum -->
       <div class="mb-8">
-       <h3 class="text-lg font-semibold text-gray-900 mb-4">🚨 Acil Durum İletişim</h3>
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Acil Durum Kişisi</label> <input type="text" id="emergencyContact" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+       <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>Acil Durum İletişim</h3>
+       <div class="grid gap-4 md:grid-cols-2">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Acil Durum Kişisi</label> <input type="text" id="emergencyContact" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Fatma Yılmaz">
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Acil Durum Telefon</label> <input type="tel" id="emergencyPhone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Acil Durum Telefon</label> <input type="tel" id="emergencyPhone" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="+90 555 111 22 33">
         </div>
        </div>
       </div><!-- Sağlık Bilgileri -->
       <div class="mb-8">
-       <h3 class="text-lg font-semibold text-gray-900 mb-4">💊 Sağlık Bilgileri</h3>
-       <div class="space-y-4">
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Tıbbi Bilgiler</label> <textarea id="medicalInfo" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+       <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-heartbeat mr-2 text-purple-600"></i>Sağlık Bilgileri</h3>
+       <div class="grid gap-4">
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Mikroçip ID</label> <input type="text" id="microchipId" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="123456789012345">
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Alerjiler</label> <textarea id="allergies" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Alerjiler</label> <textarea id="allergies" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Bilinen alerjiler"></textarea>
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Kullandığı İlaçlar</label> <textarea id="medications" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Kullandığı İlaçlar</label> <textarea id="medications" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Düzenli kullandığı ilaçlar"></textarea>
         </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-2">Özel Notlar</label> <textarea id="specialNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        <div><label class="block text-gray-700 text-sm font-bold mb-2">Tıbbi Notlar</label> <textarea id="medicalNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500" placeholder="Önemli tıbbi bilgiler, geçirdiği ameliyatlar vb."></textarea>
         </div>
        </div>
-      </div><!-- Özel Alanlar -->
+      </div><!-- Ek Bilgi Kutucukları -->
       <div class="mb-8">
        <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-900">📝 Özel Alanlar</h3><button type="button" id="addCustomField" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200"> + Alan Ekle </button>
+        <h3 class="text-lg font-bold text-gray-800 flex items-center"><i class="fas fa-plus-square mr-2 text-purple-600"></i>Ek Bilgiler</h3><button type="button" id="addCustomFieldBtn" class="text-purple-600 hover:text-purple-800"> <i class="fas fa-plus mr-1"></i>Kutucuk Ekle </button>
        </div>
-       <div id="customFieldsContainer"><!-- Özel alanlar buraya eklenecek -->
+       <div id="customFields" class="space-y-4"><!-- Dinamik kutucuklar buraya eklenecek -->
        </div>
       </div><!-- Kaydet Butonu -->
-      <div class="flex justify-end space-x-4"><button type="button" id="cancelProfile" class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200"> İptal </button> <button type="submit" id="saveProfile" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"> Profili Kaydet </button>
+      <div class="flex justify-end space-x-4"><button type="button" id="cancelProfileBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">İptal</button> <button type="submit" id="saveProfileBtn" class="btn-primary text-white px-6 py-2 rounded-lg"> <i class="fas fa-spinner fa-spin loading" id="saveLoading"></i> Kaydet </button>
       </div>
      </form>
     </main>
    </div><!-- Profil Görüntüleme Sayfası -->
    <div id="viewProfilePage" class="hidden min-h-full bg-gray-50">
-    <header class="bg-white shadow-sm border-b">
-     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center py-4"><button id="backFromView" class="flex items-center text-blue-600 hover:text-blue-800"> ← Geri Dön </button>
-       <h1 class="text-2xl font-bold text-gray-900">Profil Detayları</h1>
-       <div class="flex space-x-2"><button id="sendLocationToOwner" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-200"> 🚨 Sahibine Konum Gönder </button> <button id="shareLocation" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200 hidden"> 📍 Konum Gönder </button> <button id="editProfile" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200 hidden"> Düzenle </button>
-       </div>
+    <header class="gradient-bg text-white p-4">
+     <div class="flex justify-between items-center">
+      <div class="flex items-center"><button id="backFromViewBtn" class="mr-4 text-white hover:text-gray-200"> <i class="fas fa-arrow-left text-xl"></i> </button>
+       <h1 id="viewProfileTitle" class="text-xl font-bold">Profil</h1>
+      </div>
+      <div class="flex space-x-2"><button id="shareLocationBtn" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"> <i class="fas fa-map-marker-alt mr-1"></i>Konum Gönder </button> <button id="editProfileBtn" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"> <i class="fas fa-edit mr-1"></i>Düzenle </button>
       </div>
      </div>
     </header>
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-     <div id="profileDetails" class="bg-white rounded-lg card-shadow p-8"><!-- Profil detayları buraya yüklenecek -->
+    <main class="p-4">
+     <div id="profileDisplay" class="bg-white rounded-lg card-shadow p-6"><!-- Profil içeriği buraya yüklenecek -->
+     </div><!-- Konum Paylaşım Modalı -->
+     <div id="locationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full">
+       <h3 class="text-lg font-bold mb-4">Konum Paylaşımı</h3>
+       <p class="text-gray-600 mb-4">Konumunuz alınıyor ve harita seçenekleri gösterilecek...</p>
+       <div id="locationContent" class="mb-4">
+        <div class="text-center"><i class="fas fa-spinner fa-spin text-2xl text-purple-600 mb-2"></i>
+         <p>Konum alınıyor...</p>
+        </div>
+       </div>
+       <div class="flex justify-end space-x-2"><button id="closeLocationModal" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50">Kapat</button>
+       </div>
+      </div>
      </div>
     </main>
-   </div><!-- Konum Gönderme Modal -->
-   <div id="locationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-     <h3 id="locationModalTitle" class="text-lg font-semibold mb-4">📍 Konum Gönderiliyor</h3>
-     <p id="locationModalDesc" class="text-gray-600 mb-4">Konumunuz alınıyor ve sahibine gönderiliyor...</p>
-     <div id="locationContent" class="mb-4">
-      <div class="loading mx-auto"></div>
-     </div>
-     <div class="flex justify-end space-x-2"><button id="closeLocationModal" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"> Kapat </button>
-     </div>
-    </div>
-   </div><!-- Bildirim Toast -->
-   <div id="toast" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50"><span id="toastMessage"></span>
    </div>
   </div>
   <script>
-        // IP Geolocation API Key
-        const IP_GEOLOCATION_API_KEY = "b647e2a9739c445984120017ef0a3884";
-
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCZSnh9jWibR4a0Pc6RKBDYlGZNXP_Tiu8",
-            authDomain: "petnfc-46178.firebaseapp.com",
-            projectId: "petnfc-46178",
-            storageBucket: "petnfc-46178.firebasestorage.app",
-            messagingSenderId: "942096749783",
-            appId: "1:942096749783:web:afcd7f8e4f4f109f3c4c92",
-            measurementId: "G-XS8LXGR545"
-        };
-
-        // Firebase'i başlat
-        let auth, db;
-        try {
-            if (typeof firebase !== 'undefined') {
-                firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
-                db = firebase.firestore();
-            } else {
-                console.log("Firebase not loaded, using Data SDK");
-            }
-        } catch (error) {
-            console.log("Firebase initialization error, using Data SDK fallback");
-        }
-
         // Global değişkenler
         let currentUser = null;
         let currentProfile = null;
         let customFieldCounter = 0;
         let allProfiles = [];
-        let pendingNfcTagId = null;
 
-        // Element SDK Configuration
+        // Config ve SDK
         const defaultConfig = {
             app_title: "PatiLink",
-            welcome_message: "Hayvan dostlarınız için dijital kimlik"
+            welcome_message: "Evcil hayvanınız için dijital kimlik"
         };
 
-        const elementApi = {
+        // Data SDK Handler
+        const dataHandler = {
+            onDataChanged(data) {
+                allProfiles = data;
+                updateProfilesList();
+                updateAdminProfileSelect();
+            }
+        };
+
+        // Element SDK
+        const element = {
             defaultConfig,
             render: async (config) => {
-                const appTitle = config.app_title || defaultConfig.app_title;
-                const welcomeMessage = config.welcome_message || defaultConfig.welcome_message;
-                
-                document.getElementById('appTitle').textContent = appTitle;
-                document.getElementById('welcomeMessage').textContent = welcomeMessage;
+                document.getElementById('appTitle').textContent = config.app_title || defaultConfig.app_title;
+                document.getElementById('welcomeMessage').textContent = config.welcome_message || defaultConfig.welcome_message;
             },
             mapToCapabilities: (config) => ({
                 recolorables: [],
@@ -361,913 +246,147 @@
             ])
         };
 
-        // Data SDK Handler
-        const dataHandler = {
-            onDataChanged(data) {
-                allProfiles = data.filter(item => item.type === 'profile');
-                if (document.getElementById('mainPage').classList.contains('hidden') === false) {
-                    renderProfiles();
-                    updateAdminProfileSelect();
-                    updatePendingNfcTags();
-                }
-                if (document.getElementById('nfcAssignPage').classList.contains('hidden') === false) {
-                    renderNfcProfileList();
-                }
-            }
-        };
+        // Sayfa yönetimi
+        function showPage(pageId) {
+            const pages = ['loginPage', 'homePage', 'profilePage', 'viewProfilePage'];
+            pages.forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(pageId).classList.remove('hidden');
+        }
 
-        // SDK'ların yüklenmesini bekle
-        async function waitForSDKs() {
-            let attempts = 0;
-            const maxAttempts = 50; // 5 saniye bekle
-            
-            while (attempts < maxAttempts) {
-                if (window.dataSdk && window.elementSdk) {
-                    return true;
-                }
-                await new Promise(resolve => setTimeout(resolve, 100));
-                attempts++;
+        // Kullanıcı oturumu (basit localStorage kullanımı)
+        function saveUser(userData) {
+            localStorage.setItem('patilink_user', JSON.stringify(userData));
+            currentUser = userData;
+        }
+
+        function loadUser() {
+            const userData = localStorage.getItem('patilink_user');
+            if (userData) {
+                currentUser = JSON.parse(userData);
+                return true;
             }
             return false;
         }
 
-        // Sayfa yüklendiğinde başlat
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log("Sayfa yüklendi, başlatılıyor...");
-            
-            // Event listener'ları hemen ekle
-            setupEventListeners();
-            
-            // URL'den NFC tag kontrolü
-            checkNfcFromUrl();
-            
-            // SDK'ları arka planda başlat
-            initializeSDKs();
-            
-            // Kullanıcı durumunu kontrol et (giriş için gerekli)
-            await checkAuthState();
-        });
-
-        // SDK'ları arka planda başlat
-        async function initializeSDKs() {
-            console.log("SDK'lar başlatılıyor...");
-            
-            // Element SDK'yı hemen başlat
-            try {
-                if (window.elementSdk) {
-                    await window.elementSdk.init(elementApi);
-                    console.log("Element SDK başlatıldı");
-                }
-            } catch (error) {
-                console.error("Element SDK başlatma hatası:", error);
-            }
-            
-            // Firebase'i öncelikli olarak kullan
-            try {
-                if (auth && db) {
-                    console.log("Firebase kullanılıyor");
-                    window.useFirebase = true;
-                    window.sdkReady = true;
-                    updateSDKStatus('ready');
-                    showToast("Firebase veri sistemi hazır!", "success");
-                    return;
-                }
-            } catch (error) {
-                console.error("Firebase başlatma hatası:", error);
-            }
-            
-            // Data SDK'yı fallback olarak başlat
-            try {
-                if (window.dataSdk) {
-                    console.log("Data SDK başlatılıyor...");
-                    const initResult = await window.dataSdk.init(dataHandler);
-                    if (initResult.isOk) {
-                        console.log("Data SDK başarıyla başlatıldı");
-                        window.useFirebase = false;
-                        window.sdkReady = true;
-                        updateSDKStatus('ready');
-                        showToast("Veri sistemi hazır!", "success");
-                    } else {
-                        throw new Error("Data SDK başlatma başarısız");
-                    }
-                } else {
-                    throw new Error("Data SDK bulunamadı");
-                }
-            } catch (error) {
-                console.error("Data SDK başlatma hatası:", error);
-                // Son çare: localStorage
-                window.useFirebase = false;
-                window.sdkReady = true;
-                updateSDKStatus('fallback');
-                showToast("Yerel veri sistemi aktif", "info");
-            }
-        }
-
-        function updateSDKStatus(status) {
-            const statusElement = document.getElementById('sdkStatus');
-            if (!statusElement) return;
-            
-            switch (status) {
-                case 'loading':
-                    statusElement.innerHTML = '<span class="text-yellow-600">🔄 Veri sistemi yükleniyor...</span>';
-                    break;
-                case 'ready':
-                    statusElement.innerHTML = '<span class="text-green-600">✅ Veri sistemi hazır</span>';
-                    setTimeout(() => {
-                        statusElement.style.display = 'none';
-                    }, 3000);
-                    break;
-                case 'fallback':
-                    statusElement.innerHTML = '<span class="text-blue-600">⚡ Sistem hazır (yerel mod)</span>';
-                    setTimeout(() => {
-                        statusElement.style.display = 'none';
-                    }, 3000);
-                    break;
-                case 'error':
-                    statusElement.innerHTML = '<span class="text-red-600">❌ Veri sistemi hatası</span>';
-                    break;
-            }
-        }
-
-        function setupEventListeners() {
-            // Auth form değiştirme
-            document.getElementById('showRegister').addEventListener('click', () => {
-                document.getElementById('loginForm').classList.add('hidden');
-                document.getElementById('registerForm').classList.remove('hidden');
-            });
-
-            document.getElementById('showLogin').addEventListener('click', () => {
-                document.getElementById('registerForm').classList.add('hidden');
-                document.getElementById('loginForm').classList.remove('hidden');
-            });
-
-            // Form submit'leri
-            document.getElementById('loginFormElement').addEventListener('submit', handleLogin);
-            document.getElementById('registerFormElement').addEventListener('submit', handleRegister);
-            document.getElementById('profileForm').addEventListener('submit', handleProfileSave);
-
-            // Buton click'leri
-            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-            document.getElementById('addProfileBtn').addEventListener('click', showProfileForm);
-            document.getElementById('backToMain').addEventListener('click', showMainPage);
-            document.getElementById('backFromView').addEventListener('click', showMainPage);
-            document.getElementById('backFromNfc').addEventListener('click', showMainPage);
-            document.getElementById('cancelProfile').addEventListener('click', showMainPage);
-            document.getElementById('addCustomField').addEventListener('click', addCustomField);
-            document.getElementById('shareLocation').addEventListener('click', shareLocation);
-            document.getElementById('sendLocationToOwner').addEventListener('click', sendLocationToOwner);
-            document.getElementById('closeLocationModal').addEventListener('click', closeLocationModal);
-            document.getElementById('assignNfcBtn').addEventListener('click', assignNfcTag);
-            document.getElementById('generateNfcLink').addEventListener('click', generateNfcLink);
-            document.getElementById('copyNfcLink').addEventListener('click', copyNfcLink);
-            document.getElementById('createProfileForNfc').addEventListener('click', createProfileForNfc);
-        }
-
-        function checkNfcFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const hash = window.location.hash;
-            
-            // URL'den NFC tag ID'sini al
-            if (hash.startsWith('#nfc=')) {
-                pendingNfcTagId = hash.substring(5);
-                console.log('NFC Tag ID from URL:', pendingNfcTagId);
-            } else if (urlParams.has('nfc')) {
-                pendingNfcTagId = urlParams.get('nfc');
-                console.log('NFC Tag ID from query:', pendingNfcTagId);
-            }
-        }
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            const btn = document.getElementById('loginBtn');
-
-            if (!email || !password) {
-                showToast("E-posta ve şifre gerekli", "error");
-                return;
-            }
-
-            btn.innerHTML = '<div class="loading"></div> Giriş yapılıyor...';
-            btn.disabled = true;
-
-            try {
-                // Basit demo giriş sistemi - herhangi bir e-posta/şifre kabul et
-                if (email && password) {
-                    currentUser = {
-                        uid: 'user-' + btoa(email).replace(/[^a-zA-Z0-9]/g, ''),
-                        email: email,
-                        displayName: email.split('@')[0],
-                        isAdmin: email === 'admin@patilink.com'
-                    };
-                    
-                    localStorage.setItem('patilink_user', JSON.stringify(currentUser));
-                    
-                    showToast("Başarıyla giriş yaptınız!");
-                    
-                    // Kısa bir gecikme sonra sayfayı değiştir
-                    setTimeout(async () => {
-                        // NFC tag bekliyorsa NFC atama sayfasına git
-                        if (pendingNfcTagId) {
-                            await showNfcAssignPage();
-                        } else {
-                            await showMainPage();
-                        }
-                    }, 500);
-                } else {
-                    throw new Error("E-posta ve şifre gerekli");
-                }
-            } catch (error) {
-                showToast("Giriş başarısız: " + error.message, "error");
-            }
-
-            btn.innerHTML = 'Giriş Yap';
-            btn.disabled = false;
-        }
-
-        async function handleRegister(e) {
-            e.preventDefault();
-            const name = document.getElementById('registerName').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
-            const password = document.getElementById('registerPassword').value.trim();
-            const btn = document.getElementById('registerBtn');
-
-            if (!name || !email || !password) {
-                showToast("Tüm alanlar gerekli", "error");
-                return;
-            }
-
-            btn.innerHTML = '<div class="loading"></div> Kayıt olunuyor...';
-            btn.disabled = true;
-
-            try {
-                // Basit demo kayıt sistemi
-                if (name && email && password) {
-                    currentUser = {
-                        uid: 'user-' + btoa(email).replace(/[^a-zA-Z0-9]/g, ''),
-                        email: email,
-                        displayName: name,
-                        isAdmin: email === 'admin@patilink.com'
-                    };
-                    
-                    localStorage.setItem('patilink_user', JSON.stringify(currentUser));
-                    
-                    showToast("Hesabınız başarıyla oluşturuldu!");
-                    
-                    // Kısa bir gecikme sonra sayfayı değiştir
-                    setTimeout(async () => {
-                        // NFC tag bekliyorsa NFC atama sayfasına git
-                        if (pendingNfcTagId) {
-                            await showNfcAssignPage();
-                        } else {
-                            await showMainPage();
-                        }
-                    }, 500);
-                } else {
-                    throw new Error("Tüm alanlar gerekli");
-                }
-            } catch (error) {
-                showToast("Kayıt başarısız: " + error.message, "error");
-            }
-
-            btn.innerHTML = 'Kayıt Ol';
-            btn.disabled = false;
-        }
-
-        function handleLogout() {
-            if (auth) {
-                auth.signOut();
-            }
-            currentUser = null;
-            pendingNfcTagId = null;
+        function logout() {
             localStorage.removeItem('patilink_user');
-            document.getElementById('mainPage').classList.add('hidden');
-            document.getElementById('nfcAssignPage').classList.add('hidden');
-            document.getElementById('loginPage').classList.remove('hidden');
-            showToast("Çıkış yaptınız");
+            currentUser = null;
+            showPage('loginPage');
         }
 
-        async function checkAuthState() {
-            const savedUser = localStorage.getItem('patilink_user');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                
-                // NFC tag bekliyorsa NFC atama sayfasına git
-                if (pendingNfcTagId) {
-                    await showNfcAssignPage();
-                } else {
-                    await showMainPage();
-                }
-            } else if (pendingNfcTagId) {
-                // Giriş yapmamış ama NFC tag var - giriş sayfasında kal ama bilgi ver
-                showToast("NFC tag'inizi atamak için lütfen giriş yapın veya kayıt olun", "info");
-            }
+        // Admin kontrolü
+        function isAdmin() {
+            return currentUser && currentUser.email === 'admin@patilink.com';
         }
 
-        async function showMainPage() {
-            document.getElementById('loginPage').classList.add('hidden');
-            document.getElementById('profilePage').classList.add('hidden');
-            document.getElementById('viewProfilePage').classList.add('hidden');
-            document.getElementById('nfcAssignPage').classList.add('hidden');
-            document.getElementById('mainPage').classList.remove('hidden');
-            
-            document.getElementById('userWelcome').textContent = `Hoş geldin, ${currentUser.displayName}`;
-            
-            // Admin kontrolü
-            if (currentUser.isAdmin) {
-                document.getElementById('adminSection').classList.remove('hidden');
-            }
-            
-            // Profilleri yükle
-            await loadProfiles();
-            renderProfiles();
-            updateAdminProfileSelect();
-            updatePendingNfcTags();
-        }
-
-        async function loadProfiles() {
-            if (window.useFirebase && db) {
-                await loadProfilesFromFirebase();
-            } else if (!window.dataSdk || !window.sdkReady) {
-                // Fallback: localStorage'dan profilleri yükle
-                const profiles = JSON.parse(localStorage.getItem('patilink_profiles') || '[]');
-                allProfiles = profiles.filter(p => p.type === 'profile');
-                console.log('Profiller localStorage\'dan yüklendi:', allProfiles.length);
-            }
-        }
-
-        async function loadProfilesFromFirebase() {
-            try {
-                const snapshot = await db.collection('profiles')
-                    .where('userId', '==', currentUser.uid)
-                    .get();
-                
-                allProfiles = [];
-                snapshot.forEach(doc => {
-                    allProfiles.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
-                
-                console.log('Profiller Firebase\'dan yüklendi:', allProfiles.length);
-            } catch (error) {
-                console.error('Firebase profil yükleme hatası:', error);
-                showToast("Firebase'den profiller yüklenemedi", "error");
-            }
-        }
-
-        async function showNfcAssignPage() {
-            if (!pendingNfcTagId) {
-                await showMainPage();
-                return;
-            }
-            
-            document.getElementById('loginPage').classList.add('hidden');
-            document.getElementById('mainPage').classList.add('hidden');
-            document.getElementById('profilePage').classList.add('hidden');
-            document.getElementById('viewProfilePage').classList.add('hidden');
-            document.getElementById('nfcAssignPage').classList.remove('hidden');
-            
-            document.getElementById('currentNfcTagId').textContent = pendingNfcTagId;
-            
-            // Profilleri yükle
-            await loadProfiles();
-            renderNfcProfileList();
-        }
-
-        function renderNfcProfileList() {
-            const container = document.getElementById('nfcProfileList');
-            const userProfiles = allProfiles.filter(p => p.userId === currentUser.uid);
+        // Profil listesi güncelleme
+        function updateProfilesList() {
+            const container = document.getElementById('profilesList');
+            const userProfiles = allProfiles.filter(p => p.userId === currentUser.id);
             
             if (userProfiles.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-8">
-                        <div class="text-4xl mb-4">🐾</div>
-                        <p class="text-gray-600">Henüz profiliniz yok. Önce bir profil oluşturun.</p>
+                    <div class="col-span-full text-center py-8 text-gray-500">
+                        <i class="fas fa-paw text-4xl mb-4"></i>
+                        <p>Henüz profil oluşturmadınız</p>
+                        <p class="text-sm">İlk hayvan profilinizi oluşturmak için "Profil Ekle" butonuna tıklayın</p>
                     </div>
                 `;
                 return;
             }
 
             container.innerHTML = userProfiles.map(profile => `
-                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer" onclick="assignNfcToProfile('${profile.id}')">
+                <div class="bg-white rounded-lg card-shadow p-4 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center mb-3">
+                        <div class="text-2xl mr-3">
+                            ${profile.petType === 'Köpek' ? '🐕' : 
+                              profile.petType === 'Kedi' ? '🐱' : 
+                              profile.petType === 'Kuş' ? '🐦' : 
+                              profile.petType === 'Balık' ? '🐠' : 
+                              profile.petType === 'Hamster' ? '🐹' : 
+                              profile.petType === 'Tavşan' ? '🐰' : '🐾'}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">${profile.petName}</h3>
+                            <p class="text-gray-600 text-sm">${profile.petType}${profile.breed ? ' - ' + profile.breed : ''}</p>
+                        </div>
+                    </div>
                     <div class="flex justify-between items-center">
-                        <div>
-                            <h4 class="font-semibold text-gray-900">${profile.petName}</h4>
-                            <p class="text-sm text-gray-600">${profile.petType} ${profile.breed ? '• ' + profile.breed : ''}</p>
-                            <p class="text-xs text-gray-500">Sahip: ${profile.ownerName}</p>
-                        </div>
-                        <div class="text-blue-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function assignNfcToProfile(profileId) {
-            const profile = allProfiles.find(p => p.id === profileId);
-            if (!profile || !pendingNfcTagId) return;
-
-            try {
-                const updatedProfile = {...profile, nfcTagId: pendingNfcTagId};
-                
-                if (window.useFirebase && db) {
-                    // Firebase güncelleme
-                    await db.collection('profiles').doc(profileId).update({
-                        nfcTagId: pendingNfcTagId
-                    });
-                    showToast(`NFC Tag "${pendingNfcTagId}" başarıyla ${profile.petName} profiline atandı!`);
-                    
-                } else if (window.dataSdk && window.sdkReady) {
-                    // Data SDK güncelleme
-                    const result = await window.dataSdk.update(updatedProfile);
-                    if (result.isOk) {
-                        showToast(`NFC Tag "${pendingNfcTagId}" başarıyla ${profile.petName} profiline atandı!`);
-                    } else {
-                        throw new Error("Atama başarısız");
-                    }
-                } else {
-                    throw new Error("Veri sistemi henüz hazır değil. Lütfen birkaç saniye bekleyin.");
-                }
-                
-                pendingNfcTagId = null;
-                
-                // URL'yi temizle
-                window.history.replaceState({}, document.title, window.location.pathname);
-                
-                showMainPage();
-            } catch (error) {
-                showToast("NFC atama başarısız: " + error.message, "error");
-            }
-        }
-
-        function createProfileForNfc() {
-            showProfileForm();
-        }
-
-        function showProfileForm(profile = null) {
-            currentProfile = profile;
-            document.getElementById('mainPage').classList.add('hidden');
-            document.getElementById('nfcAssignPage').classList.add('hidden');
-            document.getElementById('profilePage').classList.remove('hidden');
-            
-            if (profile) {
-                document.getElementById('profilePageTitle').textContent = 'Profil Düzenle';
-                fillProfileForm(profile);
-            } else {
-                document.getElementById('profilePageTitle').textContent = 'Yeni Profil Oluştur';
-                clearProfileForm();
-            }
-        }
-
-        function fillProfileForm(profile) {
-            document.getElementById('petName').value = profile.petName || '';
-            document.getElementById('petType').value = profile.petType || '';
-            document.getElementById('breed').value = profile.breed || '';
-            document.getElementById('age').value = profile.age || '';
-            document.getElementById('ownerName').value = profile.ownerName || '';
-            document.getElementById('ownerPhone').value = profile.ownerPhone || '';
-            document.getElementById('ownerEmail').value = profile.ownerEmail || '';
-            document.getElementById('address').value = profile.address || '';
-            document.getElementById('vetName').value = profile.vetName || '';
-            document.getElementById('vetPhone').value = profile.vetPhone || '';
-            document.getElementById('vetAddress').value = profile.vetAddress || '';
-            document.getElementById('emergencyContact').value = profile.emergencyContact || '';
-            document.getElementById('emergencyPhone').value = profile.emergencyPhone || '';
-            document.getElementById('medicalInfo').value = profile.medicalInfo || '';
-            document.getElementById('allergies').value = profile.allergies || '';
-            document.getElementById('medications').value = profile.medications || '';
-            document.getElementById('specialNotes').value = profile.specialNotes || '';
-
-            // Özel alanları yükle
-            if (profile.customFields) {
-                const customFields = JSON.parse(profile.customFields);
-                customFields.forEach(field => {
-                    addCustomField(field.label, field.value);
-                });
-            }
-        }
-
-        function clearProfileForm() {
-            document.getElementById('profileForm').reset();
-            document.getElementById('customFieldsContainer').innerHTML = '';
-            customFieldCounter = 0;
-        }
-
-        async function handleProfileSave(e) {
-            e.preventDefault();
-            const btn = document.getElementById('saveProfile');
-            
-            btn.innerHTML = '<div class="loading"></div> Kaydediliyor...';
-            btn.disabled = true;
-
-            try {
-                const profileData = {
-                    type: 'profile',
-                    userId: currentUser.uid,
-                    petName: document.getElementById('petName').value,
-                    petType: document.getElementById('petType').value,
-                    breed: document.getElementById('breed').value,
-                    age: document.getElementById('age').value,
-                    ownerName: document.getElementById('ownerName').value,
-                    ownerPhone: document.getElementById('ownerPhone').value,
-                    ownerEmail: document.getElementById('ownerEmail').value,
-                    address: document.getElementById('address').value,
-                    vetName: document.getElementById('vetName').value,
-                    vetPhone: document.getElementById('vetPhone').value,
-                    vetAddress: document.getElementById('vetAddress').value,
-                    emergencyContact: document.getElementById('emergencyContact').value,
-                    emergencyPhone: document.getElementById('emergencyPhone').value,
-                    medicalInfo: document.getElementById('medicalInfo').value,
-                    allergies: document.getElementById('allergies').value,
-                    medications: document.getElementById('medications').value,
-                    specialNotes: document.getElementById('specialNotes').value,
-                    customFields: JSON.stringify(getCustomFields()),
-                    profileUrl: generateProfileUrl(),
-                    nfcTagId: currentProfile?.nfcTagId || pendingNfcTagId || '',
-                    isActive: true,
-                    createdAt: currentProfile?.createdAt || new Date().toISOString()
-                };
-
-                // Firebase öncelikli kullan
-                if (window.useFirebase && db) {
-                    if (currentProfile) {
-                        // Güncelleme
-                        await db.collection('profiles').doc(currentProfile.id).update(profileData);
-                        showToast("Profil Firebase'de güncellendi!");
-                    } else {
-                        // Yeni oluşturma
-                        const docRef = await db.collection('profiles').add(profileData);
-                        profileData.id = docRef.id;
-                        showToast("Profil Firebase'de oluşturuldu!");
-                    }
-                    
-                    // Profilleri yeniden yükle
-                    await loadProfilesFromFirebase();
-                    renderProfiles();
-                    
-                } else if (window.dataSdk && window.sdkReady && !window.useFirebase) {
-                    // Data SDK kullan
-                    if (currentProfile) {
-                        profileData.id = currentProfile.id;
-                        const result = await window.dataSdk.update({...currentProfile, ...profileData});
-                        if (result.isOk) {
-                            showToast("Profil güncellendi!");
-                        } else {
-                            throw new Error("Güncelleme başarısız");
-                        }
-                    } else {
-                        profileData.id = 'profile_' + Date.now();
-                        const result = await window.dataSdk.create(profileData);
-                        if (result.isOk) {
-                            showToast("Profil oluşturuldu!");
-                        } else {
-                            throw new Error("Oluşturma başarısız");
-                        }
-                    }
-                } else {
-                    // Fallback: localStorage kullan
-                    profileData.id = currentProfile?.id || 'profile_' + Date.now();
-                    const profiles = JSON.parse(localStorage.getItem('patilink_profiles') || '[]');
-                    
-                    if (currentProfile) {
-                        const index = profiles.findIndex(p => p.id === currentProfile.id);
-                        if (index >= 0) {
-                            profiles[index] = profileData;
-                        }
-                        showToast("Profil güncellendi! (yerel kayıt)");
-                    } else {
-                        profiles.push(profileData);
-                        showToast("Profil oluşturuldu! (yerel kayıt)");
-                    }
-                    
-                    localStorage.setItem('patilink_profiles', JSON.stringify(profiles));
-                    
-                    // Manuel olarak profilleri güncelle
-                    allProfiles = profiles;
-                    renderProfiles();
-                }
-                
-                // NFC tag bekliyorsa temizle
-                if (pendingNfcTagId) {
-                    showToast(`NFC Tag "${pendingNfcTagId}" profile atandı!`);
-                    pendingNfcTagId = null;
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }
-                
-                showMainPage();
-            } catch (error) {
-                showToast("Kayıt başarısız: " + error.message, "error");
-                console.error("Profile save error:", error);
-            }
-
-            btn.innerHTML = 'Profili Kaydet';
-            btn.disabled = false;
-        }
-
-        function generateNfcLink() {
-            const tagId = document.getElementById('newNfcTagId').value.trim();
-            if (!tagId) {
-                showToast("NFC Tag ID girin", "error");
-                return;
-            }
-
-            const baseUrl = window.location.origin + window.location.pathname;
-            const nfcLink = `${baseUrl}#nfc=${encodeURIComponent(tagId)}`;
-            
-            document.getElementById('generatedLink').value = nfcLink;
-            document.getElementById('generatedLinkSection').classList.remove('hidden');
-            
-            showToast("NFC linki oluşturuldu!");
-        }
-
-        function copyNfcLink() {
-            const link = document.getElementById('generatedLink').value;
-            navigator.clipboard.writeText(link).then(() => {
-                showToast("NFC linki kopyalandı!");
-            }).catch(() => {
-                showToast("Link kopyalanamadı", "error");
-            });
-        }
-
-        function updatePendingNfcTags() {
-            const container = document.getElementById('pendingNfcTags');
-            const assignedTags = allProfiles.filter(p => p.nfcTagId).map(p => p.nfcTagId);
-            
-            // Bu örnekte bekleyen tag'leri göstermek için basit bir liste
-            // Gerçek uygulamada bu bilgi ayrı bir koleksiyonda tutulabilir
-            container.innerHTML = `
-                <div class="text-sm text-gray-600">
-                    <p>💡 NFC Link oluşturun ve kullanıcılar kendi profillerine bağlasın.</p>
-                    <p class="mt-1">Atanmış tag'ler: ${assignedTags.length > 0 ? assignedTags.join(', ') : 'Henüz yok'}</p>
-                </div>
-            `;
-        }
-
-        function addCustomField(label = '', value = '') {
-            customFieldCounter++;
-            const container = document.getElementById('customFieldsContainer');
-            const fieldDiv = document.createElement('div');
-            fieldDiv.className = 'custom-field';
-            fieldDiv.innerHTML = `
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="font-medium text-gray-700">Özel Alan ${customFieldCounter}</h4>
-                    <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-500 hover:text-red-700">
-                        🗑️ Sil
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Alan Adı</label>
-                        <input type="text" class="custom-field-label w-full px-3 py-2 border border-gray-300 rounded-md" value="${label}" placeholder="Örn: Favori Oyuncak">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Değer</label>
-                        <input type="text" class="custom-field-value w-full px-3 py-2 border border-gray-300 rounded-md" value="${value}" placeholder="Örn: Kırmızı top">
-                    </div>
-                </div>
-            `;
-            container.appendChild(fieldDiv);
-        }
-
-        function getCustomFields() {
-            const fields = [];
-            const labels = document.querySelectorAll('.custom-field-label');
-            const values = document.querySelectorAll('.custom-field-value');
-            
-            for (let i = 0; i < labels.length; i++) {
-                if (labels[i].value.trim()) {
-                    fields.push({
-                        label: labels[i].value.trim(),
-                        value: values[i].value.trim()
-                    });
-                }
-            }
-            return fields;
-        }
-
-        function generateProfileUrl() {
-            return window.location.origin + window.location.pathname + '#profile_' + Date.now();
-        }
-
-        function renderProfiles() {
-            const container = document.getElementById('profilesContainer');
-            const userProfiles = allProfiles.filter(p => p.userId === currentUser.uid);
-            
-            if (userProfiles.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-12">
-                        <div class="text-6xl mb-4">🐾</div>
-                        <h3 class="text-xl font-medium text-gray-900 mb-2">Henüz profil oluşturmadınız</h3>
-                        <p class="text-gray-500 mb-4">İlk hayvan profilinizi oluşturmak için butona tıklayın</p>
-                        <button onclick="showProfileForm()" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200">
-                            İlk Profili Oluştur
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = userProfiles.map(profile => `
-                <div class="bg-white rounded-lg card-shadow p-6 hover:shadow-lg transition duration-200">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-900">${profile.petName}</h3>
-                            <p class="text-gray-600">${profile.petType} ${profile.breed ? '• ' + profile.breed : ''}</p>
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-user mr-1"></i>${profile.ownerName}
                         </div>
                         <div class="flex space-x-2">
-                            <button onclick="viewProfile('${profile.id}')" class="text-blue-600 hover:text-blue-800">
-                                👁️
+                            <button onclick="viewProfile('${profile.__backendId}')" class="text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-eye"></i>
                             </button>
-                            <button onclick="showProfileForm(${JSON.stringify(profile).replace(/"/g, '&quot;')})" class="text-green-600 hover:text-green-800">
-                                ✏️
+                            <button onclick="editProfile('${profile.__backendId}')" class="text-green-600 hover:text-green-800">
+                                <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="deleteProfile('${profile.id}')" class="text-red-600 hover:text-red-800">
-                                🗑️
+                            <button onclick="deleteProfile('${profile.__backendId}')" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="space-y-2 text-sm text-gray-600">
-                        <p><strong>Sahip:</strong> ${profile.ownerName}</p>
-                        <p><strong>Telefon:</strong> ${profile.ownerPhone}</p>
-                        ${profile.nfcTagId ? `<p><strong>NFC Tag:</strong> ${profile.nfcTagId}</p>` : ''}
-                    </div>
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500">Profil Linki:</span>
-                            <button onclick="copyProfileUrl('${profile.profileUrl}')" class="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded">
-                                📋 Kopyala
-                            </button>
+                    <div class="mt-3 pt-3 border-t border-gray-200">
+                        <div class="text-xs text-gray-500 break-all">
+                            Profil Linki: ${window.location.origin}?profile=${profile.__backendId}
                         </div>
+                        <button onclick="copyProfileLink('${profile.__backendId}')" class="text-xs text-purple-600 hover:text-purple-800 mt-1">
+                            <i class="fas fa-copy mr-1"></i>Linki Kopyala
+                        </button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function viewProfile(profileId) {
-            const profile = allProfiles.find(p => p.id === profileId);
-            if (!profile) return;
-
-            document.getElementById('mainPage').classList.add('hidden');
-            document.getElementById('viewProfilePage').classList.remove('hidden');
+        // Admin profil seçenekleri güncelleme
+        function updateAdminProfileSelect() {
+            if (!isAdmin()) return;
             
-            // Kullanıcı kontrolü - sadece sahip düzenleyebilir
-            const isOwner = currentUser && profile.userId === currentUser.uid;
-            
-            if (isOwner) {
-                document.getElementById('editProfile').classList.remove('hidden');
-                document.getElementById('shareLocation').classList.remove('hidden');
-                document.getElementById('sendLocationToOwner').classList.add('hidden');
-                document.getElementById('editProfile').onclick = () => showProfileForm(profile);
-            } else {
-                document.getElementById('editProfile').classList.add('hidden');
-                document.getElementById('shareLocation').classList.add('hidden');
-                document.getElementById('sendLocationToOwner').classList.remove('hidden');
-            }
-            
-            // Global değişkene profili kaydet
-            window.currentViewingProfile = profile;
-            
-            renderProfileDetails(profile);
+            const select = document.getElementById('profileSelect');
+            select.innerHTML = '<option value="">Profil Seçin</option>' + 
+                allProfiles.map(profile => 
+                    `<option value="${profile.__backendId}">${profile.petName} (${profile.ownerName})</option>`
+                ).join('');
         }
 
-        function renderProfileDetails(profile) {
-            const container = document.getElementById('profileDetails');
-            const customFields = profile.customFields ? JSON.parse(profile.customFields) : [];
-            
-            container.innerHTML = `
-                <div class="text-center mb-8">
-                    <div class="text-6xl mb-4">🐾</div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">${profile.petName}</h1>
-                    <p class="text-xl text-gray-600">${profile.petType} ${profile.breed ? '• ' + profile.breed : ''}</p>
-                    ${profile.age ? `<p class="text-gray-500">${profile.age} yaşında</p>` : ''}
-                </div>
+        // Profil işlemleri
+        function viewProfile(profileId) {
+            const profile = allProfiles.find(p => p.__backendId === profileId);
+            if (!profile) return;
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Sahip Bilgileri -->
-                    <div class="bg-blue-50 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                            👤 Sahip Bilgileri
-                        </h3>
-                        <div class="space-y-3">
-                            <div>
-                                <p class="font-medium text-gray-700">${profile.ownerName}</p>
-                                <div class="flex space-x-2 mt-1">
-                                    <a href="tel:${profile.ownerPhone}" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
-                                        📞 ${profile.ownerPhone}
-                                    </a>
-                                </div>
-                            </div>
-                            ${profile.ownerEmail ? `<p class="text-gray-600">📧 ${profile.ownerEmail}</p>` : ''}
-                            ${profile.address ? `<p class="text-gray-600">📍 ${profile.address}</p>` : ''}
-                        </div>
-                    </div>
+            currentProfile = profile;
+            displayProfile(profile);
+            showPage('viewProfilePage');
+        }
 
-                    <!-- Veteriner Bilgileri -->
-                    ${profile.vetName ? `
-                    <div class="bg-green-50 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                            🏥 Veteriner Bilgileri
-                        </h3>
-                        <div class="space-y-3">
-                            <div>
-                                <p class="font-medium text-gray-700">${profile.vetName}</p>
-                                ${profile.vetPhone ? `
-                                <div class="flex space-x-2 mt-1">
-                                    <a href="tel:${profile.vetPhone}" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
-                                        📞 ${profile.vetPhone}
-                                    </a>
-                                </div>
-                                ` : ''}
-                            </div>
-                            ${profile.vetAddress ? `<p class="text-gray-600">📍 ${profile.vetAddress}</p>` : ''}
-                        </div>
-                    </div>
-                    ` : ''}
+        function editProfile(profileId) {
+            const profile = allProfiles.find(p => p.__backendId === profileId);
+            if (!profile) return;
 
-                    <!-- Acil Durum -->
-                    ${profile.emergencyContact ? `
-                    <div class="bg-red-50 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                            🚨 Acil Durum İletişim
-                        </h3>
-                        <div class="space-y-3">
-                            <div>
-                                <p class="font-medium text-gray-700">${profile.emergencyContact}</p>
-                                ${profile.emergencyPhone ? `
-                                <div class="flex space-x-2 mt-1">
-                                    <a href="tel:${profile.emergencyPhone}" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">
-                                        🚨 ${profile.emergencyPhone}
-                                    </a>
-                                </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    ` : ''}
-
-                    <!-- Sağlık Bilgileri -->
-                    ${(profile.medicalInfo || profile.allergies || profile.medications) ? `
-                    <div class="bg-yellow-50 rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                            💊 Sağlık Bilgileri
-                        </h3>
-                        <div class="space-y-3">
-                            ${profile.medicalInfo ? `<div><strong>Tıbbi Bilgiler:</strong><br>${profile.medicalInfo}</div>` : ''}
-                            ${profile.allergies ? `<div><strong>Alerjiler:</strong><br>${profile.allergies}</div>` : ''}
-                            ${profile.medications ? `<div><strong>İlaçlar:</strong><br>${profile.medications}</div>` : ''}
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-
-                <!-- Özel Notlar -->
-                ${profile.specialNotes ? `
-                <div class="mt-8 bg-purple-50 rounded-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📝 Özel Notlar</h3>
-                    <p class="text-gray-700">${profile.specialNotes}</p>
-                </div>
-                ` : ''}
-
-                <!-- Özel Alanlar -->
-                ${customFields.length > 0 ? `
-                <div class="mt-8 bg-gray-50 rounded-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📋 Ek Bilgiler</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${customFields.map(field => `
-                            <div class="bg-white p-3 rounded border">
-                                <strong class="text-gray-700">${field.label}:</strong>
-                                <p class="text-gray-600">${field.value}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-            `;
+            currentProfile = profile;
+            fillProfileForm(profile);
+            showPage('profilePage');
         }
 
         async function deleteProfile(profileId) {
-            const profile = allProfiles.find(p => p.id === profileId);
+            const profile = allProfiles.find(p => p.__backendId === profileId);
             if (!profile) return;
 
-            // İnline onay sistemi
+            // Inline confirmation
             const profileCard = event.target.closest('.bg-white');
             const originalContent = profileCard.innerHTML;
             
             profileCard.innerHTML = `
-                <div class="p-6 text-center">
-                    <div class="text-4xl mb-4">⚠️</div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Profili Sil?</h3>
-                    <p class="text-gray-600 mb-4">${profile.petName} profilini kalıcı olarak silmek istediğinizden emin misiniz?</p>
-                    <div class="flex justify-center space-x-4">
-                        <button onclick="confirmDelete('${profileId}')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                <div class="p-4 text-center">
+                    <p class="text-red-600 mb-4">Bu profili silmek istediğinizden emin misiniz?</p>
+                    <div class="flex justify-center space-x-2">
+                        <button onclick="confirmDelete('${profileId}')" class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">
                             Evet, Sil
                         </button>
-                        <button onclick="cancelDelete(this, \`${originalContent.replace(/`/g, '\\`')}\`)" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400">
+                        <button onclick="cancelDelete(this, \`${originalContent.replace(/`/g, '\\`')}\`)" class="bg-gray-300 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-400">
                             İptal
                         </button>
                     </div>
@@ -1275,362 +394,474 @@
             `;
         }
 
+        async function confirmDelete(profileId) {
+            const profile = allProfiles.find(p => p.__backendId === profileId);
+            if (!profile) return;
+
+            const result = await window.dataSdk.delete(profile);
+            if (result.isOk) {
+                showMessage('Profil başarıyla silindi', 'success');
+            } else {
+                showMessage('Profil silinirken hata oluştu', 'error');
+            }
+        }
+
         function cancelDelete(button, originalContent) {
             const profileCard = button.closest('.bg-white');
             profileCard.innerHTML = originalContent;
         }
 
-        async function confirmDelete(profileId) {
-            const profile = allProfiles.find(p => p.id === profileId);
-            if (!profile) return;
-
-            try {
-                if (window.useFirebase && db) {
-                    // Firebase'den sil
-                    await db.collection('profiles').doc(profileId).delete();
-                    showToast("Profil Firebase'den silindi");
-                    
-                    // Profilleri yeniden yükle
-                    await loadProfilesFromFirebase();
-                    renderProfiles();
-                    
-                } else if (window.dataSdk && window.sdkReady) {
-                    // Data SDK ile sil
-                    const result = await window.dataSdk.delete(profile);
-                    if (result.isOk) {
-                        showToast("Profil silindi");
-                    } else {
-                        throw new Error("Silme işlemi başarısız");
-                    }
-                } else {
-                    throw new Error("Veri sistemi henüz hazır değil. Lütfen birkaç saniye bekleyin.");
-                }
-            } catch (error) {
-                showToast("Silme başarısız: " + error.message, "error");
-                renderProfiles(); // Listeyi yenile
-            }
+        // Profil formu doldurma
+        function fillProfileForm(profile) {
+            document.getElementById('petName').value = profile.petName || '';
+            document.getElementById('petType').value = profile.petType || '';
+            document.getElementById('breed').value = profile.breed || '';
+            document.getElementById('age').value = profile.age || '';
+            document.getElementById('weight').value = profile.weight || '';
+            document.getElementById('color').value = profile.color || '';
+            document.getElementById('ownerName').value = profile.ownerName || '';
+            document.getElementById('ownerPhone').value = profile.ownerPhone || '';
+            document.getElementById('ownerEmail').value = profile.ownerEmail || '';
+            document.getElementById('ownerAddress').value = profile.ownerAddress || '';
+            document.getElementById('vetName').value = profile.vetName || '';
+            document.getElementById('vetPhone').value = profile.vetPhone || '';
+            document.getElementById('vetAddress').value = profile.vetAddress || '';
+            document.getElementById('emergencyContact').value = profile.emergencyContact || '';
+            document.getElementById('emergencyPhone').value = profile.emergencyPhone || '';
+            document.getElementById('medicalNotes').value = profile.medicalNotes || '';
+            document.getElementById('allergies').value = profile.allergies || '';
+            document.getElementById('medications').value = profile.medications || '';
+            document.getElementById('microchipId').value = profile.microchipId || '';
         }
 
-        function copyProfileUrl(url) {
-            navigator.clipboard.writeText(url).then(() => {
-                showToast("Profil linki kopyalandı!");
-            }).catch(() => {
-                showToast("Link kopyalanamadı", "error");
-            });
-        }
-
-        function updateAdminProfileSelect() {
-            if (!currentUser?.isAdmin) return;
+        // Profil görüntüleme
+        function displayProfile(profile) {
+            document.getElementById('viewProfileTitle').textContent = profile.petName;
             
-            const select = document.getElementById('profileSelect');
-            const userProfiles = allProfiles.filter(p => p.userId === currentUser.uid);
-            
-            select.innerHTML = '<option value="">Profil seçin...</option>' + 
-                userProfiles.map(p => `<option value="${p.id}">${p.petName} (${p.petType})</option>`).join('');
-        }
-
-        async function assignNfcTag() {
-            const tagId = document.getElementById('nfcTagId').value.trim();
-            const profileId = document.getElementById('profileSelect').value;
-            
-            if (!tagId || !profileId) {
-                showToast("NFC Tag ID ve profil seçimi gerekli", "error");
-                return;
-            }
-
-            const profile = allProfiles.find(p => p.id === profileId);
-            if (!profile) {
-                showToast("Profil bulunamadı", "error");
-                return;
-            }
-
-            const btn = document.getElementById('assignNfcBtn');
-            btn.innerHTML = '<div class="loading"></div> Atanıyor...';
-            btn.disabled = true;
-
-            try {
-                if (!window.dataSdk || !window.sdkReady) {
-                    throw new Error("Veri sistemi henüz hazır değil. Lütfen birkaç saniye bekleyin.");
-                }
-
-                const updatedProfile = {...profile, nfcTagId: tagId};
-                const result = await window.dataSdk.update(updatedProfile);
-                
-                if (result.isOk) {
-                    showToast("NFC Tag başarıyla atandı!");
-                    document.getElementById('nfcTagId').value = '';
-                    document.getElementById('profileSelect').value = '';
-                } else {
-                    throw new Error("Atama başarısız");
-                }
-            } catch (error) {
-                showToast("NFC atama başarısız: " + error.message, "error");
-            }
-
-            btn.innerHTML = 'NFC Tag\'e Profil Ata';
-            btn.disabled = false;
-        }
-
-        async function sendLocationToOwner() {
-            const profile = window.currentViewingProfile;
-            if (!profile) {
-                showToast("Profil bilgisi bulunamadı", "error");
-                return;
-            }
-
-            document.getElementById('locationModalTitle').textContent = '🚨 Sahibine Konum Gönderiliyor';
-            document.getElementById('locationModalDesc').textContent = 'Konumunuz alınıyor ve hayvan sahibine gönderiliyor...';
-            document.getElementById('locationModal').classList.remove('hidden');
-            
-            try {
-                const locationData = await getLocationWithFallback();
-                sendLocationToOwnerComplete(profile, locationData);
-            } catch (error) {
-                document.getElementById('locationContent').innerHTML = `
-                    <div class="text-red-600 text-center">
-                        <p>Konum alınamadı: ${error.message}</p>
-                        <p class="text-sm mt-2">Lütfen konum izni verin veya internet bağlantınızı kontrol edin.</p>
+            const display = document.getElementById('profileDisplay');
+            display.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="text-6xl mb-4">
+                        ${profile.petType === 'Köpek' ? '🐕' : 
+                          profile.petType === 'Kedi' ? '🐱' : 
+                          profile.petType === 'Kuş' ? '🐦' : 
+                          profile.petType === 'Balık' ? '🐠' : 
+                          profile.petType === 'Hamster' ? '🐹' : 
+                          profile.petType === 'Tavşan' ? '🐰' : '🐾'}
                     </div>
-                `;
-            }
-        }
-
-        async function getLocationWithFallback() {
-            // Önce GPS ile yüksek doğrulukta konum almaya çalış
-            try {
-                const position = await new Promise((resolve, reject) => {
-                    if (!navigator.geolocation) {
-                        reject(new Error('Geolocation desteklenmiyor'));
-                        return;
-                    }
-                    
-                    navigator.geolocation.getCurrentPosition(
-                        resolve,
-                        reject,
-                        {
-                            enableHighAccuracy: true,
-                            timeout: 10000,
-                            maximumAge: 60000
-                        }
-                    );
-                });
-
-                return {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                    accuracy: position.coords.accuracy,
-                    source: 'GPS',
-                    timestamp: new Date().toISOString()
-                };
-            } catch (gpsError) {
-                console.log('GPS failed, trying IP geolocation:', gpsError.message);
-                
-                // GPS başarısız olursa IP Geolocation API kullan
-                try {
-                    const response = await fetch(`https://api.ipgeolocation.io/ipgeo?apiKey=${IP_GEOLOCATION_API_KEY}`);
-                    const data = await response.json();
-                    
-                    if (data.latitude && data.longitude) {
-                        return {
-                            lat: parseFloat(data.latitude),
-                            lng: parseFloat(data.longitude),
-                            accuracy: 10000, // IP based location is less accurate
-                            source: 'IP',
-                            city: data.city,
-                            country: data.country_name,
-                            timestamp: new Date().toISOString()
-                        };
-                    } else {
-                        throw new Error('IP geolocation failed');
-                    }
-                } catch (ipError) {
-                    throw new Error('Hem GPS hem de IP konum servisi başarısız oldu');
-                }
-            }
-        }
-
-        function sendLocationToOwnerComplete(profile, locationData) {
-            const { lat, lng, accuracy, source, city, country, timestamp } = locationData;
-            const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-            const date = new Date(timestamp);
-            const timeStr = date.toLocaleString('tr-TR');
-            
-            let locationMessage = `🚨 ACİL DURUM - ${profile.petName} bulundu!\n\n`;
-            locationMessage += `📅 Tarih: ${timeStr}\n`;
-            locationMessage += `📍 Konum: ${lat.toFixed(6)}, ${lng.toFixed(6)}\n`;
-            
-            if (city && country) {
-                locationMessage += `🏙️ Şehir: ${city}, ${country}\n`;
-            }
-            
-            locationMessage += `🎯 Doğruluk: ~${Math.round(accuracy)}m (${source})\n`;
-            locationMessage += `🗺️ Harita: ${googleMapsUrl}`;
-            
-            const accuracyColor = accuracy < 100 ? 'text-green-600' : accuracy < 1000 ? 'text-yellow-600' : 'text-orange-600';
-            const sourceIcon = source === 'GPS' ? '🛰️' : '🌐';
-            
-            document.getElementById('locationContent').innerHTML = `
-                <div class="text-center">
-                    <div class="text-4xl mb-4">✅</div>
-                    <p class="text-green-600 font-semibold mb-4">Konum başarıyla hazırlandı!</p>
-                    
-                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
-                        <div class="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <p class="text-gray-700"><strong>Hayvan:</strong> ${profile.petName}</p>
-                                <p class="text-gray-700"><strong>Sahip:</strong> ${profile.ownerName}</p>
-                                <p class="text-gray-700"><strong>Telefon:</strong> ${profile.ownerPhone}</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-700"><strong>Zaman:</strong> ${timeStr}</p>
-                                <p class="${accuracyColor}"><strong>Doğruluk:</strong> ~${Math.round(accuracy)}m</p>
-                                <p class="text-gray-700"><strong>Kaynak:</strong> ${sourceIcon} ${source}</p>
-                            </div>
-                        </div>
-                        ${city && country ? `<p class="text-gray-600 mt-2">📍 ${city}, ${country}</p>` : ''}
-                    </div>
-                    
-                    <div class="space-y-3">
-                        <div class="bg-blue-50 p-3 rounded border">
-                            <p class="text-sm font-medium text-gray-700 mb-2">Konum Mesajı:</p>
-                            <textarea readonly class="w-full text-xs bg-white border rounded p-2 h-24">${locationMessage}</textarea>
-                            <button onclick="copyLocationMessage(\`${locationMessage.replace(/`/g, '\\`')}\`)" class="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 w-full">
-                                📋 Mesajı Kopyala
-                            </button>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 gap-2">
-                            <a href="tel:${profile.ownerPhone}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-center block">
-                                📞 ${profile.ownerPhone} - Sahip Ara
-                            </a>
-                            ${profile.emergencyPhone ? `
-                            <a href="tel:${profile.emergencyPhone}" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-center block">
-                                🚨 ${profile.emergencyPhone} - Acil Durum Ara
-                            </a>
-                            ` : ''}
-                            ${profile.vetPhone ? `
-                            <a href="tel:${profile.vetPhone}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-center block">
-                                🏥 ${profile.vetPhone} - Veteriner Ara
-                            </a>
-                            ` : ''}
-                        </div>
-
-                        <div class="mt-4">
-                            <p class="text-xs text-gray-600 mb-2">Harita uygulamasında aç:</p>
-                            <div class="grid grid-cols-1 gap-1">
-                                <a href="${googleMapsUrl}" target="_blank" class="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-700 text-center block">
-                                    🗺️ Google Maps
-                                </a>
-                                <a href="https://maps.apple.com/?q=${lat},${lng}" target="_blank" class="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-700 text-center block">
-                                    🍎 Apple Maps
-                                </a>
-                                <a href="https://waze.com/ul?ll=${lat},${lng}" target="_blank" class="bg-gray-600 text-white px-3 py-1 rounded text-xs hover:bg-gray-700 text-center block">
-                                    🚗 Waze
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">${profile.petName}</h1>
+                    <p class="text-gray-600">${profile.petType}${profile.breed ? ' - ' + profile.breed : ''}</p>
                 </div>
+
+                <div class="grid gap-6 md:grid-cols-2">
+                    <!-- Temel Bilgiler -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-bold text-lg mb-3 flex items-center">
+                            <i class="fas fa-paw mr-2 text-purple-600"></i>Temel Bilgiler
+                        </h3>
+                        ${profile.age ? `<p><strong>Yaş:</strong> ${profile.age}</p>` : ''}
+                        ${profile.weight ? `<p><strong>Ağırlık:</strong> ${profile.weight}</p>` : ''}
+                        ${profile.color ? `<p><strong>Renk:</strong> ${profile.color}</p>` : ''}
+                        ${profile.microchipId ? `<p><strong>Mikroçip:</strong> ${profile.microchipId}</p>` : ''}
+                    </div>
+
+                    <!-- Sahip Bilgileri -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-bold text-lg mb-3 flex items-center">
+                            <i class="fas fa-user mr-2 text-purple-600"></i>Sahip Bilgileri
+                        </h3>
+                        <p><strong>Ad:</strong> ${profile.ownerName}</p>
+                        <p class="flex items-center">
+                            <strong>Telefon:</strong> 
+                            <a href="tel:${profile.ownerPhone}" class="ml-2 text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-phone mr-1"></i>${profile.ownerPhone}
+                            </a>
+                        </p>
+                        ${profile.ownerEmail ? `<p><strong>Email:</strong> <a href="mailto:${profile.ownerEmail}" class="text-blue-600 hover:text-blue-800">${profile.ownerEmail}</a></p>` : ''}
+                        ${profile.ownerAddress ? `<p><strong>Adres:</strong> ${profile.ownerAddress}</p>` : ''}
+                    </div>
+
+                    <!-- Veteriner Bilgileri -->
+                    ${profile.vetName || profile.vetPhone ? `
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="font-bold text-lg mb-3 flex items-center">
+                            <i class="fas fa-stethoscope mr-2 text-purple-600"></i>Veteriner
+                        </h3>
+                        ${profile.vetName ? `<p><strong>Veteriner:</strong> ${profile.vetName}</p>` : ''}
+                        ${profile.vetPhone ? `<p class="flex items-center"><strong>Telefon:</strong> <a href="tel:${profile.vetPhone}" class="ml-2 text-blue-600 hover:text-blue-800"><i class="fas fa-phone mr-1"></i>${profile.vetPhone}</a></p>` : ''}
+                        ${profile.vetAddress ? `<p><strong>Adres:</strong> ${profile.vetAddress}</p>` : ''}
+                    </div>
+                    ` : ''}
+
+                    <!-- Acil Durum -->
+                    ${profile.emergencyContact || profile.emergencyPhone ? `
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <h3 class="font-bold text-lg mb-3 flex items-center text-red-800">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Acil Durum
+                        </h3>
+                        ${profile.emergencyContact ? `<p><strong>Kişi:</strong> ${profile.emergencyContact}</p>` : ''}
+                        ${profile.emergencyPhone ? `<p class="flex items-center"><strong>Telefon:</strong> <a href="tel:${profile.emergencyPhone}" class="ml-2 text-red-600 hover:text-red-800"><i class="fas fa-phone mr-1"></i>${profile.emergencyPhone}</a></p>` : ''}
+                    </div>
+                    ` : ''}
+                </div>
+
+                <!-- Sağlık Bilgileri -->
+                ${profile.allergies || profile.medications || profile.medicalNotes ? `
+                <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 class="font-bold text-lg mb-3 flex items-center text-blue-800">
+                        <i class="fas fa-heartbeat mr-2"></i>Sağlık Bilgileri
+                    </h3>
+                    ${profile.allergies ? `<p><strong>Alerjiler:</strong> ${profile.allergies}</p>` : ''}
+                    ${profile.medications ? `<p><strong>İlaçlar:</strong> ${profile.medications}</p>` : ''}
+                    ${profile.medicalNotes ? `<p><strong>Tıbbi Notlar:</strong> ${profile.medicalNotes}</p>` : ''}
+                </div>
+                ` : ''}
             `;
         }
 
-        function copyLocationMessage(message) {
-            navigator.clipboard.writeText(message).then(() => {
-                showToast("Konum mesajı kopyalandı! WhatsApp veya SMS ile gönderebilirsiniz.");
-            }).catch(() => {
-                showToast("Mesaj kopyalanamadı", "error");
-            });
-        }
-
-        async function shareLocation() {
-            document.getElementById('locationModalTitle').textContent = '📍 Konum Paylaşımı';
-            document.getElementById('locationModalDesc').textContent = 'Konumunuz alınıyor ve paylaşım linki oluşturuluyor...';
+        // Konum paylaşımı
+        function shareLocation() {
             document.getElementById('locationModal').classList.remove('hidden');
             
-            try {
-                const locationData = await getLocationWithFallback();
-                showLocationOptions(locationData.lat, locationData.lng);
-            } catch (error) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        showLocationOptions(lat, lng);
+                    },
+                    (error) => {
+                        document.getElementById('locationContent').innerHTML = `
+                            <div class="text-center text-red-600">
+                                <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                                <p>Konum alınamadı</p>
+                                <p class="text-sm">Lütfen konum izni verin</p>
+                            </div>
+                        `;
+                    }
+                );
+            } else {
                 document.getElementById('locationContent').innerHTML = `
-                    <div class="text-red-600 text-center">
-                        <p>Konum alınamadı: ${error.message}</p>
-                        <p class="text-sm mt-2">Lütfen konum izni verin veya manuel olarak konum paylaşın.</p>
+                    <div class="text-center text-red-600">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p>Konum desteklenmiyor</p>
                     </div>
                 `;
             }
         }
 
         function showLocationOptions(lat, lng) {
-            const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-            const appleMapsUrl = `https://maps.apple.com/?q=${lat},${lng}`;
-            const wazeUrl = `https://waze.com/ul?ll=${lat},${lng}`;
-            
-            document.getElementById('locationContent').innerHTML = `
-                <div class="text-center">
-                    <p class="text-green-600 mb-4">✅ Konum başarıyla alındı!</p>
-                    <p class="text-sm text-gray-600 mb-4">Harita uygulaması seçin:</p>
-                    <div class="space-y-2">
-                        <a href="${googleMapsUrl}" target="_blank" class="map-button block">
-                            🗺️ Google Maps'te Aç
-                        </a>
-                        <a href="${appleMapsUrl}" target="_blank" class="map-button block">
-                            🍎 Apple Maps'te Aç
-                        </a>
-                        <a href="${wazeUrl}" target="_blank" class="map-button block">
-                            🚗 Waze'de Aç
-                        </a>
-                    </div>
-                    <div class="mt-4 p-3 bg-gray-100 rounded text-xs">
-                        <p><strong>Koordinatlar:</strong></p>
-                        <p>Enlem: ${lat.toFixed(6)}</p>
-                        <p>Boylam: ${lng.toFixed(6)}</p>
-                        <button onclick="copyCoordinates('${lat},${lng}')" class="mt-2 bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600">
-                            📋 Koordinatları Kopyala
-                        </button>
-                    </div>
+            const content = document.getElementById('locationContent');
+            content.innerHTML = `
+                <div class="text-center mb-4">
+                    <i class="fas fa-map-marker-alt text-2xl text-green-600 mb-2"></i>
+                    <p class="font-semibold">Konumunuz alındı!</p>
+                    <p class="text-sm text-gray-600">Harita uygulamasını seçin:</p>
+                </div>
+                <div class="grid gap-2">
+                    <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" rel="noopener noreferrer" 
+                       class="flex items-center justify-center bg-blue-500 text-white p-3 rounded hover:bg-blue-600">
+                        <i class="fas fa-map mr-2"></i>Google Maps
+                    </a>
+                    <a href="https://maps.apple.com/?q=${lat},${lng}" target="_blank" rel="noopener noreferrer"
+                       class="flex items-center justify-center bg-gray-800 text-white p-3 rounded hover:bg-gray-900">
+                        <i class="fas fa-map mr-2"></i>Apple Maps
+                    </a>
+                    <a href="https://waze.com/ul?ll=${lat},${lng}" target="_blank" rel="noopener noreferrer"
+                       class="flex items-center justify-center bg-blue-400 text-white p-3 rounded hover:bg-blue-500">
+                        <i class="fas fa-route mr-2"></i>Waze
+                    </a>
                 </div>
             `;
         }
 
-        function copyCoordinates(coords) {
-            navigator.clipboard.writeText(coords).then(() => {
-                showToast("Koordinatlar kopyalandı!");
+        // Yardımcı fonksiyonlar
+        function copyProfileLink(profileId) {
+            const link = `${window.location.origin}?profile=${profileId}`;
+            navigator.clipboard.writeText(link).then(() => {
+                showMessage('Profil linki kopyalandı!', 'success');
             });
         }
 
-        function closeLocationModal() {
-            document.getElementById('locationModal').classList.add('hidden');
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            
-            toastMessage.textContent = message;
-            toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
-                type === 'error' ? 'bg-red-500' : type === 'info' ? 'bg-blue-500' : 'bg-green-500'
-            } text-white`;
-            toast.classList.remove('hidden');
+        function showMessage(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            }`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
             
             setTimeout(() => {
-                toast.classList.add('hidden');
+                toast.remove();
             }, 3000);
         }
 
-        // URL'den profil ID'si kontrol et (NFC tag'den gelme durumu)
-        window.addEventListener('load', () => {
-            const hash = window.location.hash;
-            if (hash.startsWith('#profile_')) {
-                const profileId = hash.substring(1);
-                // NFC'den gelen kullanıcılar için özel görünüm
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // Ek alan ekleme
+        function addCustomField() {
+            customFieldCounter++;
+            const container = document.getElementById('customFields');
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'flex gap-2';
+            fieldDiv.innerHTML = `
+                <input type="text" placeholder="Alan adı" class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                <input type="text" placeholder="Değer" class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-purple-500">
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-600 hover:text-red-800 px-2">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(fieldDiv);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            // SDK'ları başlat
+            if (window.dataSdk) {
+                const initResult = await window.dataSdk.init(dataHandler);
+                if (!initResult.isOk) {
+                    console.error('Data SDK başlatılamadı');
+                }
+            }
+
+            if (window.elementSdk) {
+                await window.elementSdk.init(element);
+            }
+
+            // URL'den profil kontrolü
+            const urlParams = new URLSearchParams(window.location.search);
+            const profileId = urlParams.get('profile');
+            
+            if (profileId) {
+                // Profil görüntüleme modunda başlat
                 setTimeout(() => {
-                    const profile = allProfiles.find(p => p.id === profileId);
+                    const profile = allProfiles.find(p => p.__backendId === profileId);
                     if (profile) {
-                        viewProfile(profileId);
+                        displayProfile(profile);
+                        showPage('viewProfilePage');
+                        // Geri butonu gizle (dış bağlantıdan geldiği için)
+                        document.getElementById('backFromViewBtn').style.display = 'none';
                     }
                 }, 1000);
+                return;
             }
+
+            // Normal kullanıcı girişi kontrolü
+            if (loadUser()) {
+                document.getElementById('userNameDisplay').textContent = currentUser.name;
+                if (isAdmin()) {
+                    document.getElementById('adminPanel').classList.remove('hidden');
+                }
+                showPage('homePage');
+            } else {
+                showPage('loginPage');
+            }
+
+            // Form event listeners
+            document.getElementById('showRegisterBtn').addEventListener('click', () => {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerForm').classList.remove('hidden');
+            });
+
+            document.getElementById('showLoginBtn').addEventListener('click', () => {
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('loginForm').classList.remove('hidden');
+            });
+
+            // Giriş formu
+            document.getElementById('loginBtn').addEventListener('click', async () => {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                if (!email || !password) {
+                    showMessage('Lütfen tüm alanları doldurun', 'error');
+                    return;
+                }
+
+                const loading = document.getElementById('loginLoading');
+                loading.classList.add('show');
+
+                // Basit kullanıcı doğrulama (gerçek uygulamada Firebase Auth kullanılacak)
+                setTimeout(() => {
+                    const userData = {
+                        id: generateId(),
+                        name: email.split('@')[0],
+                        email: email
+                    };
+                    
+                    saveUser(userData);
+                    document.getElementById('userNameDisplay').textContent = userData.name;
+                    
+                    if (isAdmin()) {
+                        document.getElementById('adminPanel').classList.remove('hidden');
+                    }
+                    
+                    loading.classList.remove('show');
+                    showPage('homePage');
+                    showMessage('Başarıyla giriş yaptınız!', 'success');
+                }, 1000);
+            });
+
+            // Kayıt formu
+            document.getElementById('registerBtn').addEventListener('click', async () => {
+                const name = document.getElementById('registerName').value;
+                const email = document.getElementById('registerEmail').value;
+                const phone = document.getElementById('registerPhone').value;
+                const password = document.getElementById('registerPassword').value;
+                
+                if (!name || !email || !phone || !password) {
+                    showMessage('Lütfen tüm alanları doldurun', 'error');
+                    return;
+                }
+
+                const loading = document.getElementById('registerLoading');
+                loading.classList.add('show');
+
+                setTimeout(() => {
+                    const userData = {
+                        id: generateId(),
+                        name: name,
+                        email: email,
+                        phone: phone
+                    };
+                    
+                    saveUser(userData);
+                    document.getElementById('userNameDisplay').textContent = userData.name;
+                    
+                    loading.classList.remove('show');
+                    showPage('homePage');
+                    showMessage('Hesabınız başarıyla oluşturuldu!', 'success');
+                }, 1000);
+            });
+
+            // Çıkış
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+
+            // Profil ekleme
+            document.getElementById('addProfileBtn').addEventListener('click', () => {
+                currentProfile = null;
+                document.getElementById('profileForm').reset();
+                document.getElementById('customFields').innerHTML = '';
+                customFieldCounter = 0;
+                showPage('profilePage');
+            });
+
+            // Profil formu
+            document.getElementById('profileForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const loading = document.getElementById('saveLoading');
+                loading.classList.add('show');
+
+                const profileData = {
+                    id: currentProfile ? currentProfile.id : generateId(),
+                    type: 'profile',
+                    userId: currentUser.id,
+                    petName: document.getElementById('petName').value,
+                    petType: document.getElementById('petType').value,
+                    breed: document.getElementById('breed').value,
+                    age: document.getElementById('age').value,
+                    weight: document.getElementById('weight').value,
+                    color: document.getElementById('color').value,
+                    ownerName: document.getElementById('ownerName').value,
+                    ownerPhone: document.getElementById('ownerPhone').value,
+                    ownerEmail: document.getElementById('ownerEmail').value,
+                    ownerAddress: document.getElementById('ownerAddress').value,
+                    vetName: document.getElementById('vetName').value,
+                    vetPhone: document.getElementById('vetPhone').value,
+                    vetAddress: document.getElementById('vetAddress').value,
+                    emergencyContact: document.getElementById('emergencyContact').value,
+                    emergencyPhone: document.getElementById('emergencyPhone').value,
+                    medicalNotes: document.getElementById('medicalNotes').value,
+                    allergies: document.getElementById('allergies').value,
+                    medications: document.getElementById('medications').value,
+                    microchipId: document.getElementById('microchipId').value,
+                    profileUrl: `${window.location.origin}?profile=${currentProfile ? currentProfile.__backendId : 'new'}`,
+                    isActive: true,
+                    createdAt: new Date().toISOString()
+                };
+
+                let result;
+                if (currentProfile) {
+                    profileData.__backendId = currentProfile.__backendId;
+                    result = await window.dataSdk.update(profileData);
+                } else {
+                    result = await window.dataSdk.create(profileData);
+                }
+
+                loading.classList.remove('show');
+
+                if (result.isOk) {
+                    showMessage(currentProfile ? 'Profil güncellendi!' : 'Profil oluşturuldu!', 'success');
+                    showPage('homePage');
+                } else {
+                    showMessage('Profil kaydedilirken hata oluştu', 'error');
+                }
+            });
+
+            // Diğer event listeners
+            document.getElementById('cancelProfileBtn').addEventListener('click', () => {
+                showPage('homePage');
+            });
+
+            document.getElementById('backToHomeBtn').addEventListener('click', () => {
+                showPage('homePage');
+            });
+
+            document.getElementById('backFromViewBtn').addEventListener('click', () => {
+                showPage('homePage');
+            });
+
+            document.getElementById('editProfileBtn').addEventListener('click', () => {
+                if (currentProfile) {
+                    fillProfileForm(currentProfile);
+                    showPage('profilePage');
+                }
+            });
+
+            document.getElementById('shareLocationBtn').addEventListener('click', shareLocation);
+
+            document.getElementById('closeLocationModal').addEventListener('click', () => {
+                document.getElementById('locationModal').classList.add('hidden');
+            });
+
+            document.getElementById('addCustomFieldBtn').addEventListener('click', addCustomField);
+
+            // Admin NFC güncelleme
+            document.getElementById('updateNfcBtn').addEventListener('click', async () => {
+                const nfcUrl = document.getElementById('nfcUrl').value;
+                const selectedProfileId = document.getElementById('profileSelect').value;
+                
+                if (!nfcUrl || !selectedProfileId) {
+                    showMessage('Lütfen URL ve profil seçin', 'error');
+                    return;
+                }
+
+                const loading = document.getElementById('nfcLoading');
+                loading.classList.add('show');
+
+                // NFC tag güncelleme simülasyonu
+                setTimeout(() => {
+                    loading.classList.remove('show');
+                    showMessage('NFC tag başarıyla güncellendi!', 'success');
+                    
+                    // URL'yi temizle
+                    document.getElementById('nfcUrl').value = '';
+                    document.getElementById('profileSelect').value = '';
+                }, 1500);
+            });
         });
+
+        // Global fonksiyonlar (onclick için)
+        window.viewProfile = viewProfile;
+        window.editProfile = editProfile;
+        window.deleteProfile = deleteProfile;
+        window.confirmDelete = confirmDelete;
+        window.cancelDelete = cancelDelete;
+        window.copyProfileLink = copyProfileLink;
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991b76a4601150ed',t:'MTc2MDk5NDIyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991b9b0430742a87',t:'MTc2MDk5NTcxMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
