@@ -401,11 +401,11 @@
             // URL'den NFC tag kontrolü
             checkNfcFromUrl();
             
-            // Kullanıcı durumunu kontrol et (giriş için gerekli)
-            checkAuthState();
-
             // SDK'ları arka planda başlat
             initializeSDKs();
+            
+            // Kullanıcı durumunu kontrol et (giriş için gerekli)
+            await checkAuthState();
         });
 
         // SDK'ları arka planda başlat
@@ -422,35 +422,44 @@
                 console.error("Element SDK başlatma hatası:", error);
             }
             
-            // Data SDK'yı başlat - daha basit yaklaşım
+            // Firebase'i öncelikli olarak kullan
+            try {
+                if (auth && db) {
+                    console.log("Firebase kullanılıyor");
+                    window.useFirebase = true;
+                    window.sdkReady = true;
+                    updateSDKStatus('ready');
+                    showToast("Firebase veri sistemi hazır!", "success");
+                    return;
+                }
+            } catch (error) {
+                console.error("Firebase başlatma hatası:", error);
+            }
+            
+            // Data SDK'yı fallback olarak başlat
             try {
                 if (window.dataSdk) {
                     console.log("Data SDK başlatılıyor...");
                     const initResult = await window.dataSdk.init(dataHandler);
                     if (initResult.isOk) {
                         console.log("Data SDK başarıyla başlatıldı");
+                        window.useFirebase = false;
                         window.sdkReady = true;
                         updateSDKStatus('ready');
                         showToast("Veri sistemi hazır!", "success");
                     } else {
-                        console.error("Data SDK başlatma hatası:", initResult.error);
-                        // Fallback - SDK olmadan da çalışabilir
-                        window.sdkReady = false;
-                        updateSDKStatus('fallback');
-                        showToast("Veri sistemi fallback modda çalışıyor", "info");
+                        throw new Error("Data SDK başlatma başarısız");
                     }
                 } else {
-                    console.log("Data SDK bulunamadı, fallback moda geçiliyor");
-                    window.sdkReady = false;
-                    updateSDKStatus('fallback');
-                    showToast("Veri sistemi fallback modda çalışıyor", "info");
+                    throw new Error("Data SDK bulunamadı");
                 }
             } catch (error) {
                 console.error("Data SDK başlatma hatası:", error);
-                // Fallback - SDK olmadan da çalışabilir
-                window.sdkReady = false;
+                // Son çare: localStorage
+                window.useFirebase = false;
+                window.sdkReady = true;
                 updateSDKStatus('fallback');
-                showToast("Veri sistemi fallback modda çalışıyor", "info");
+                showToast("Yerel veri sistemi aktif", "info");
             }
         }
 
@@ -543,24 +552,31 @@
             btn.disabled = true;
 
             try {
-                // Basit demo giriş sistemi
-                currentUser = {
-                    uid: 'user-' + btoa(email).replace(/[^a-zA-Z0-9]/g, ''),
-                    email: email,
-                    displayName: email.split('@')[0],
-                    isAdmin: email === 'admin@patilink.com'
-                };
-                
-                localStorage.setItem('patilink_user', JSON.stringify(currentUser));
-                
-                // NFC tag bekliyorsa NFC atama sayfasına git
-                if (pendingNfcTagId) {
-                    showNfcAssignPage();
+                // Basit demo giriş sistemi - herhangi bir e-posta/şifre kabul et
+                if (email && password) {
+                    currentUser = {
+                        uid: 'user-' + btoa(email).replace(/[^a-zA-Z0-9]/g, ''),
+                        email: email,
+                        displayName: email.split('@')[0],
+                        isAdmin: email === 'admin@patilink.com'
+                    };
+                    
+                    localStorage.setItem('patilink_user', JSON.stringify(currentUser));
+                    
+                    showToast("Başarıyla giriş yaptınız!");
+                    
+                    // Kısa bir gecikme sonra sayfayı değiştir
+                    setTimeout(async () => {
+                        // NFC tag bekliyorsa NFC atama sayfasına git
+                        if (pendingNfcTagId) {
+                            await showNfcAssignPage();
+                        } else {
+                            await showMainPage();
+                        }
+                    }, 500);
                 } else {
-                    showMainPage();
+                    throw new Error("E-posta ve şifre gerekli");
                 }
-                
-                showToast("Başarıyla giriş yaptınız!");
             } catch (error) {
                 showToast("Giriş başarısız: " + error.message, "error");
             }
@@ -586,23 +602,30 @@
 
             try {
                 // Basit demo kayıt sistemi
-                currentUser = {
-                    uid: 'user-' + btoa(email).replace(/[^a-zA-Z0-9]/g, ''),
-                    email: email,
-                    displayName: name,
-                    isAdmin: email === 'admin@patilink.com'
-                };
-                
-                localStorage.setItem('patilink_user', JSON.stringify(currentUser));
-                
-                // NFC tag bekliyorsa NFC atama sayfasına git
-                if (pendingNfcTagId) {
-                    showNfcAssignPage();
+                if (name && email && password) {
+                    currentUser = {
+                        uid: 'user-' + btoa(email).replace(/[^a-zA-Z0-9]/g, ''),
+                        email: email,
+                        displayName: name,
+                        isAdmin: email === 'admin@patilink.com'
+                    };
+                    
+                    localStorage.setItem('patilink_user', JSON.stringify(currentUser));
+                    
+                    showToast("Hesabınız başarıyla oluşturuldu!");
+                    
+                    // Kısa bir gecikme sonra sayfayı değiştir
+                    setTimeout(async () => {
+                        // NFC tag bekliyorsa NFC atama sayfasına git
+                        if (pendingNfcTagId) {
+                            await showNfcAssignPage();
+                        } else {
+                            await showMainPage();
+                        }
+                    }, 500);
                 } else {
-                    showMainPage();
+                    throw new Error("Tüm alanlar gerekli");
                 }
-                
-                showToast("Hesabınız başarıyla oluşturuldu!");
             } catch (error) {
                 showToast("Kayıt başarısız: " + error.message, "error");
             }
@@ -624,16 +647,16 @@
             showToast("Çıkış yaptınız");
         }
 
-        function checkAuthState() {
+        async function checkAuthState() {
             const savedUser = localStorage.getItem('patilink_user');
             if (savedUser) {
                 currentUser = JSON.parse(savedUser);
                 
                 // NFC tag bekliyorsa NFC atama sayfasına git
                 if (pendingNfcTagId) {
-                    showNfcAssignPage();
+                    await showNfcAssignPage();
                 } else {
-                    showMainPage();
+                    await showMainPage();
                 }
             } else if (pendingNfcTagId) {
                 // Giriş yapmamış ama NFC tag var - giriş sayfasında kal ama bilgi ver
@@ -641,7 +664,7 @@
             }
         }
 
-        function showMainPage() {
+        async function showMainPage() {
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('profilePage').classList.add('hidden');
             document.getElementById('viewProfilePage').classList.add('hidden');
@@ -655,15 +678,17 @@
                 document.getElementById('adminSection').classList.remove('hidden');
             }
             
-            // Profilleri yükle - SDK yoksa localStorage'dan
-            loadProfiles();
+            // Profilleri yükle
+            await loadProfiles();
             renderProfiles();
             updateAdminProfileSelect();
             updatePendingNfcTags();
         }
 
-        function loadProfiles() {
-            if (!window.dataSdk || !window.sdkReady) {
+        async function loadProfiles() {
+            if (window.useFirebase && db) {
+                await loadProfilesFromFirebase();
+            } else if (!window.dataSdk || !window.sdkReady) {
                 // Fallback: localStorage'dan profilleri yükle
                 const profiles = JSON.parse(localStorage.getItem('patilink_profiles') || '[]');
                 allProfiles = profiles.filter(p => p.type === 'profile');
@@ -671,9 +696,30 @@
             }
         }
 
-        function showNfcAssignPage() {
+        async function loadProfilesFromFirebase() {
+            try {
+                const snapshot = await db.collection('profiles')
+                    .where('userId', '==', currentUser.uid)
+                    .get();
+                
+                allProfiles = [];
+                snapshot.forEach(doc => {
+                    allProfiles.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                console.log('Profiller Firebase\'dan yüklendi:', allProfiles.length);
+            } catch (error) {
+                console.error('Firebase profil yükleme hatası:', error);
+                showToast("Firebase'den profiller yüklenemedi", "error");
+            }
+        }
+
+        async function showNfcAssignPage() {
             if (!pendingNfcTagId) {
-                showMainPage();
+                await showMainPage();
                 return;
             }
             
@@ -684,6 +730,9 @@
             document.getElementById('nfcAssignPage').classList.remove('hidden');
             
             document.getElementById('currentNfcTagId').textContent = pendingNfcTagId;
+            
+            // Profilleri yükle
+            await loadProfiles();
             renderNfcProfileList();
         }
 
@@ -724,24 +773,33 @@
             if (!profile || !pendingNfcTagId) return;
 
             try {
-                if (!window.dataSdk || !window.sdkReady) {
+                const updatedProfile = {...profile, nfcTagId: pendingNfcTagId};
+                
+                if (window.useFirebase && db) {
+                    // Firebase güncelleme
+                    await db.collection('profiles').doc(profileId).update({
+                        nfcTagId: pendingNfcTagId
+                    });
+                    showToast(`NFC Tag "${pendingNfcTagId}" başarıyla ${profile.petName} profiline atandı!`);
+                    
+                } else if (window.dataSdk && window.sdkReady) {
+                    // Data SDK güncelleme
+                    const result = await window.dataSdk.update(updatedProfile);
+                    if (result.isOk) {
+                        showToast(`NFC Tag "${pendingNfcTagId}" başarıyla ${profile.petName} profiline atandı!`);
+                    } else {
+                        throw new Error("Atama başarısız");
+                    }
+                } else {
                     throw new Error("Veri sistemi henüz hazır değil. Lütfen birkaç saniye bekleyin.");
                 }
-
-                const updatedProfile = {...profile, nfcTagId: pendingNfcTagId};
-                const result = await window.dataSdk.update(updatedProfile);
                 
-                if (result.isOk) {
-                    showToast(`NFC Tag "${pendingNfcTagId}" başarıyla ${profile.petName} profiline atandı!`);
-                    pendingNfcTagId = null;
-                    
-                    // URL'yi temizle
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    
-                    showMainPage();
-                } else {
-                    throw new Error("Atama başarısız");
-                }
+                pendingNfcTagId = null;
+                
+                // URL'yi temizle
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                showMainPage();
             } catch (error) {
                 showToast("NFC atama başarısız: " + error.message, "error");
             }
@@ -835,8 +893,25 @@
                     createdAt: currentProfile?.createdAt || new Date().toISOString()
                 };
 
-                // Data SDK varsa kullan, yoksa localStorage'a kaydet
-                if (window.dataSdk && window.sdkReady) {
+                // Firebase öncelikli kullan
+                if (window.useFirebase && db) {
+                    if (currentProfile) {
+                        // Güncelleme
+                        await db.collection('profiles').doc(currentProfile.id).update(profileData);
+                        showToast("Profil Firebase'de güncellendi!");
+                    } else {
+                        // Yeni oluşturma
+                        const docRef = await db.collection('profiles').add(profileData);
+                        profileData.id = docRef.id;
+                        showToast("Profil Firebase'de oluşturuldu!");
+                    }
+                    
+                    // Profilleri yeniden yükle
+                    await loadProfilesFromFirebase();
+                    renderProfiles();
+                    
+                } else if (window.dataSdk && window.sdkReady && !window.useFirebase) {
+                    // Data SDK kullan
                     if (currentProfile) {
                         profileData.id = currentProfile.id;
                         const result = await window.dataSdk.update({...currentProfile, ...profileData});
@@ -1210,15 +1285,25 @@
             if (!profile) return;
 
             try {
-                if (!window.dataSdk || !window.sdkReady) {
-                    throw new Error("Veri sistemi henüz hazır değil. Lütfen birkaç saniye bekleyin.");
-                }
-
-                const result = await window.dataSdk.delete(profile);
-                if (result.isOk) {
-                    showToast("Profil silindi");
+                if (window.useFirebase && db) {
+                    // Firebase'den sil
+                    await db.collection('profiles').doc(profileId).delete();
+                    showToast("Profil Firebase'den silindi");
+                    
+                    // Profilleri yeniden yükle
+                    await loadProfilesFromFirebase();
+                    renderProfiles();
+                    
+                } else if (window.dataSdk && window.sdkReady) {
+                    // Data SDK ile sil
+                    const result = await window.dataSdk.delete(profile);
+                    if (result.isOk) {
+                        showToast("Profil silindi");
+                    } else {
+                        throw new Error("Silme işlemi başarısız");
+                    }
                 } else {
-                    throw new Error("Silme işlemi başarısız");
+                    throw new Error("Veri sistemi henüz hazır değil. Lütfen birkaç saniye bekleyin.");
                 }
             } catch (error) {
                 showToast("Silme başarısız: " + error.message, "error");
@@ -1547,5 +1632,5 @@
             }
         });
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991b64dd55fe2a87',t:'MTc2MDk5MzQ5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991b76a4601150ed',t:'MTc2MDk5NDIyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
