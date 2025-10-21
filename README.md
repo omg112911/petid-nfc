@@ -1,1 +1,3 @@
 # petid-nfc
+
+TELİF HAKKI MEVCUTTUR
