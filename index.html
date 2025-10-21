@@ -496,7 +496,7 @@
       </div>
      </div><!-- Veteriner Bilgileri -->
      <div class="mb-6">
-      <h4 class="text-lg font-semibold mb-3">Veteriner Bilgileri</h4>
+      <h4 class="text-lg font-semibold mb-3">Ek Alan</h4>
       <div id="edit-vet-fields" class="space-y-3"><!-- Vet fields will be loaded here -->
       </div><button type="button" id="add-edit-vet-field" class="mt-3 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"> + Yeni Alan Ekle </button>
      </div>
@@ -573,11 +573,35 @@
                     if (user) {
                         currentUser = user;
                         await checkUserRole(user.uid);
-                        showUserDashboard();
+                        
+                        // Check for NFC link first, then show appropriate view
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const petId = urlParams.get('pet');
+                        const linkId = urlParams.get('link');
+                        
+                        if (petId && linkId) {
+                            loadPetProfile(petId, linkId);
+                        } else if (linkId) {
+                            loadPetProfileByLink(linkId);
+                        } else {
+                            showUserDashboard();
+                        }
                     } else {
                         currentUser = null;
                         isAdmin = false;
-                        showWelcomeSection();
+                        
+                        // Check for NFC link even when not logged in
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const petId = urlParams.get('pet');
+                        const linkId = urlParams.get('link');
+                        
+                        if (petId && linkId) {
+                            loadPetProfile(petId, linkId);
+                        } else if (linkId) {
+                            loadPetProfileByLink(linkId);
+                        } else {
+                            showWelcomeSection();
+                        }
                     }
                 });
             }
@@ -676,8 +700,7 @@
             // User location filter
             document.getElementById('user-location-filter').addEventListener('change', filterUserPetLocations);
 
-            // Check for pet profile URL parameter
-            checkForPetProfile();
+            // NFC link kontrolü initializeAuth() içinde yapılıyor
         }
 
         function showModal(modalId) {
@@ -1478,19 +1501,7 @@
             ]);
         }
 
-        // Check for pet profile URL parameter
-        function checkForPetProfile() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const petId = urlParams.get('pet');
-            const linkId = urlParams.get('link');
-            
-            if (petId && linkId) {
-                loadPetProfile(petId, linkId);
-            } else if (linkId) {
-                // Sadece link ID varsa, link ile ilişkili pet'i bul
-                loadPetProfileByLink(linkId);
-            }
-        }
+        // NFC link kontrolü artık initializeAuth() içinde yapılıyor
 
         // Load pet profile by link ID only
         async function loadPetProfileByLink(linkId) {
@@ -2466,5 +2477,5 @@
             }
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9922b04306af2a87',t:'MTc2MTA2OTk4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9922b6de96682a87',t:'MTc2MTA3MDI1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
