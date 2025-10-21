@@ -147,14 +147,16 @@
      </div>
     </div><!-- Pet Profile Page (for NFC readers) -->
     <div id="pet-profile-page" class="hidden">
-     <div class="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto">
+     <div class="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto"><!-- Ana Sayfa Dönüş Butonu -->
+      <div class="mb-6"><button id="back-to-home-btn" class="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"> <span class="text-xl">←</span> <span class="font-medium">Ana Sayfaya Dön</span> </button>
+      </div>
       <div class="text-center mb-8">
        <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"><span id="pet-profile-emoji" class="text-4xl">🐾</span>
        </div>
        <h1 id="pet-profile-name" class="text-3xl font-bold text-gray-800 mb-2">Hayvan Adı</h1>
        <p id="pet-profile-species" class="text-xl text-gray-600">Tür • Cins</p>
       </div><!-- Quick Actions for NFC Readers -->
-      <div class="grid md:grid-cols-3 gap-4 mb-8"><button id="call-owner-btn" class="bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"> <span class="text-2xl">📞</span> <span class="font-semibold">Sahibini Ara</span> </button> <button id="send-location-to-owner-btn" class="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"> <span class="text-2xl">📍</span> <span class="font-semibold">Konum Gönder</span> </button> <button id="get-directions-btn" class="bg-purple-600 text-white p-4 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"> <span class="text-2xl">🗺️</span> <span class="font-semibold">Adres Tarifi</span> </button>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"><button id="call-owner-btn" class="bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"> <span class="text-2xl">📞</span> <span class="font-semibold">Sahibini Ara</span> </button> <button id="whatsapp-owner-btn" class="bg-green-500 text-white p-4 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center space-x-2"> <span class="text-2xl">💬</span> <span class="font-semibold">WhatsApp</span> </button> <button id="send-location-to-owner-btn" class="bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"> <span class="text-2xl">📍</span> <span class="font-semibold">Konum Gönder</span> </button> <button id="get-directions-btn" class="bg-purple-600 text-white p-4 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"> <span class="text-2xl">🗺️</span> <span class="font-semibold">Adres Tarifi</span> </button>
       </div><!-- Pet Details -->
       <div class="grid md:grid-cols-2 gap-8 mb-8">
        <div>
@@ -371,11 +373,17 @@
        <div><label class="block text-gray-700 text-sm font-bold mb-2">Alternatif İletişim Telefon</label> <input type="tel" id="pet-alt-contact-phone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
        </div>
       </div>
-     </div><!-- Veteriner Bilgileri -->
+     </div><!-- WhatsApp Bilgisi -->
      <div class="mb-6">
-      <h4 class="text-lg font-semibold mb-3">Veteriner Bilgileri</h4>
+      <h4 class="text-lg font-semibold mb-3 text-green-600">💬 WhatsApp İletişim</h4>
+      <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2">WhatsApp Numarası</label> <input type="tel" id="pet-whatsapp" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="+90 555 123 4567">
+       <p class="text-xs text-gray-500 mt-1">Ülke kodu ile birlikte yazın (örn: +90 555 123 4567)</p>
+      </div>
+     </div><!-- Ek Bilgiler -->
+     <div class="mb-6">
+      <h4 class="text-lg font-semibold mb-3 text-orange-600">📝 Ek Bilgiler</h4>
       <div id="vet-fields" class="space-y-3">
-       <div class="flex gap-2"><input type="text" placeholder="Özellik adı (örn: Aşı Durumu)" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"> <input type="text" placeholder="Değer" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"> <button type="button" class="remove-vet-field bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors">×</button>
+       <div class="flex gap-2"><input type="text" placeholder="Özellik adı (örn: Aşı Durumu, Favori Oyuncak)" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"> <input type="text" placeholder="Değer" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"> <button type="button" class="remove-vet-field bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors">×</button>
        </div>
       </div><button type="button" id="add-vet-field" class="mt-3 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"> + Yeni Alan Ekle </button>
      </div>
@@ -494,9 +502,15 @@
        <div><label class="block text-gray-700 text-sm font-bold mb-2">Alternatif İletişim Telefon</label> <input type="tel" id="edit-pet-alt-contact-phone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
        </div>
       </div>
-     </div><!-- Veteriner Bilgileri -->
+     </div><!-- WhatsApp Bilgisi -->
      <div class="mb-6">
-      <h4 class="text-lg font-semibold mb-3">Ek Alan</h4>
+      <h4 class="text-lg font-semibold mb-3 text-green-600">💬 WhatsApp İletişim</h4>
+      <div class="mb-4"><label class="block text-gray-700 text-sm font-bold mb-2">WhatsApp Numarası</label> <input type="tel" id="edit-pet-whatsapp" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="+90 555 123 4567">
+       <p class="text-xs text-gray-500 mt-1">Ülke kodu ile birlikte yazın (örn: +90 555 123 4567)</p>
+      </div>
+     </div><!-- Ek Bilgiler -->
+     <div class="mb-6">
+      <h4 class="text-lg font-semibold mb-3 text-orange-600">📝 Ek Bilgiler</h4>
       <div id="edit-vet-fields" class="space-y-3"><!-- Vet fields will be loaded here -->
       </div><button type="button" id="add-edit-vet-field" class="mt-3 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"> + Yeni Alan Ekle </button>
      </div>
@@ -690,8 +704,10 @@
 
             // NFC Reader actions
             document.getElementById('call-owner-btn').addEventListener('click', callOwner);
+            document.getElementById('whatsapp-owner-btn').addEventListener('click', whatsappOwner);
             document.getElementById('send-location-to-owner-btn').addEventListener('click', sendLocationToOwner);
             document.getElementById('get-directions-btn').addEventListener('click', getDirections);
+            document.getElementById('back-to-home-btn').addEventListener('click', backToHome);
 
             // Activity filter
             document.getElementById('activity-pet-filter').addEventListener('change', filterPetActivities);
@@ -890,6 +906,9 @@
                     homeAddress: document.getElementById('pet-home-address').value,
                     altContactName: document.getElementById('pet-alt-contact-name').value,
                     altContactPhone: document.getElementById('pet-alt-contact-phone').value,
+                    
+                    // WhatsApp bilgisi
+                    whatsapp: document.getElementById('pet-whatsapp').value,
                     
                     ownerId: currentUser.uid,
                     createdAt: new Date().toISOString(),
@@ -1319,6 +1338,9 @@
                 document.getElementById('edit-pet-home-address').value = petData.homeAddress || '';
                 document.getElementById('edit-pet-alt-contact-name').value = petData.altContactName || '';
                 document.getElementById('edit-pet-alt-contact-phone').value = petData.altContactPhone || '';
+                
+                // WhatsApp bilgisi
+                document.getElementById('edit-pet-whatsapp').value = petData.whatsapp || '';
 
                 // Load veteriner fields
                 const editVetFields = document.getElementById('edit-vet-fields');
@@ -1401,6 +1423,9 @@
                     homeAddress: document.getElementById('edit-pet-home-address').value,
                     altContactName: document.getElementById('edit-pet-alt-contact-name').value,
                     altContactPhone: document.getElementById('edit-pet-alt-contact-phone').value,
+                    
+                    // WhatsApp bilgisi
+                    whatsapp: document.getElementById('edit-pet-whatsapp').value,
                     
                     updatedAt: new Date().toISOString(),
                     vetInfo: {}
@@ -1654,6 +1679,13 @@
                         <p><strong>E-posta:</strong> <a href="mailto:${currentOwnerData.email}" class="text-blue-600 hover:underline">${currentOwnerData.email}</a></p>
                     `;
                     
+                    // WhatsApp varsa göster
+                    if (currentPetData.whatsapp && currentPetData.whatsapp.trim()) {
+                        const cleanNumber = currentPetData.whatsapp.replace(/[^\d+]/g, '');
+                        const message = encodeURIComponent(`Merhaba, ${currentPetData.name} isimli ${currentPetData.species.toLowerCase()}unuzu buldum. Lütfen benimle iletişime geçin.`);
+                        ownerContactHtml += `<p><strong>WhatsApp:</strong> <a href="https://wa.me/${cleanNumber}?text=${message}" target="_blank" class="text-green-600 hover:underline font-semibold text-lg">${currentPetData.whatsapp}</a></p>`;
+                    }
+                    
                     // Ev adresi varsa göster
                     if (currentPetData.homeAddress && currentPetData.homeAddress.trim()) {
                         ownerContactHtml += `<p><strong>Adres:</strong> ${currentPetData.homeAddress}</p>`;
@@ -1707,6 +1739,38 @@
                 logActivity('call');
             } else {
                 showToast('Sahip telefon numarası bulunamadı!', 'error');
+            }
+        }
+
+        function whatsappOwner() {
+            if (currentPetData && currentPetData.whatsapp) {
+                // WhatsApp numarasını temizle (sadece rakamlar ve + işareti)
+                const cleanNumber = currentPetData.whatsapp.replace(/[^\d+]/g, '');
+                const message = encodeURIComponent(`Merhaba, ${currentPetData.name} isimli ${currentPetData.species.toLowerCase()}unuzu buldum. Lütfen benimle iletişime geçin.`);
+                
+                // Mobil cihazlarda WhatsApp uygulamasını açmaya çalış, yoksa web versiyonunu aç
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                
+                if (isMobile) {
+                    // Mobil cihazlarda önce WhatsApp uygulamasını açmaya çalış
+                    const whatsappAppUrl = `whatsapp://send?phone=${cleanNumber}&text=${message}`;
+                    const whatsappWebUrl = `https://wa.me/${cleanNumber}?text=${message}`;
+                    
+                    // WhatsApp uygulamasını açmaya çalış
+                    window.location.href = whatsappAppUrl;
+                    
+                    // Eğer uygulama açılmazsa web versiyonunu aç
+                    setTimeout(() => {
+                        window.open(whatsappWebUrl, '_blank');
+                    }, 1000);
+                } else {
+                    // Masaüstünde WhatsApp Web'i aç
+                    window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank');
+                }
+                
+                logActivity('whatsapp');
+            } else {
+                showToast('WhatsApp numarası bulunamadı!', 'error');
             }
         }
 
@@ -1782,6 +1846,22 @@
                 );
             } catch (error) {
                 console.error('Error logging activity:', error);
+            }
+        }
+
+        // Ana sayfaya dönüş fonksiyonu
+        function backToHome() {
+            // URL'deki parametreleri temizle
+            const url = new URL(window.location);
+            url.searchParams.delete('pet');
+            url.searchParams.delete('link');
+            window.history.pushState({}, '', url);
+            
+            // Sayfayı yenile veya ana sayfayı göster
+            if (currentUser) {
+                showUserDashboard();
+            } else {
+                showWelcomeSection();
             }
         }
 
@@ -2227,6 +2307,7 @@
             const types = {
                 'scan': 'NFC Tarandı',
                 'call': 'Sahip Arandı',
+                'whatsapp': 'WhatsApp Gönderildi',
                 'location_sent': 'Konum Gönderildi',
                 'directions_requested': 'Yol Tarifi İstendi'
             };
@@ -2238,6 +2319,7 @@
             const icons = {
                 'scan': '📱',
                 'call': '📞',
+                'whatsapp': '💬',
                 'location_sent': '📍',
                 'directions_requested': '🗺️'
             };
@@ -2477,5 +2559,5 @@
             }
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9922b6de96682a87',t:'MTc2MTA3MDI1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9922c628115e50ed',t:'MTc2MTA3MDg4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
