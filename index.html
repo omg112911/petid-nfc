@@ -162,6 +162,56 @@
        <div class="text-2xl font-bold text-gray-800" id="totalLocationShares">
         0
        </div>
+       <div id="locationHistory" class="mt-6">
+                        <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-history mr-2 text-orange-600"></i>Konum Geçmişi
+                        </h4>
+                        <div id="locationHistoryList" class="space-y-3 max-h-64 overflow-y-auto bg-gray-50 p-3 rounded-lg border">
+                                                    </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                    ```
+
+**B) Konum Geçmişi Listesini Doldurma:**
+Yine `displayProfile` fonksiyonu içinde, `if (currentUser && profile.userId === currentUser.uid)` bloğunu bulun. Bu bloğun içindeki `updateProfileStats(profile);` satırını bulun ve **hemen altına** aşağıdaki JavaScript kodunu ekleyin:
+
+```javascript
+                        updateProfileStats(profile);
+                        
+                        // YENİ: Konum Geçmişini Yükle
+                        const historyContainer = document.getElementById('locationHistoryList');
+                        if (profile.locationHistory && profile.locationHistory.length > 0) {
+                            historyContainer.innerHTML = profile.locationHistory.map(loc => {
+                                const date = new Date(loc.timestamp);
+                                const formattedDate = date.toLocaleDateString('tr-TR', {
+                                    day: '2-digit', month: '2-digit', year: 'numeric',s
+                                    hour: '2-digit', minute: '2-digit'
+                                });
+                                
+                                return `
+                                    <div class="bg-white p-3 rounded border border-gray-200">
+                                        <p class="text-sm font-semibold text-gray-700">${formattedDate}</p>
+                                        <p class="text-xs text-gray-500 mb-2">
+                                            Lat: ${loc.latitude.toFixed(6)}, Lng: ${loc.longitude.toFixed(6)}
+                                        </p>
+                                        <div class="flex flex-wrap gap-2">
+                                            <a href="https://maps.google.com/?q=${loc.latitude},${loc.longitude}" target="_blank" rel="noopener noreferrer" class="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
+S                                             <i class="fab fa-google mr-1"></i> Google
+                                            </a>
+                                            <a href="https://www.yandex.com.tr/harita/?ll=${loc.longitude},${loc.latitude}&z=15" target="_blank" rel="noopener noreferrer" class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+                                                Yandex
+                                            </a>
+                                            <button onclick="copyLocationText('${loc.latitude}', '${loc.longitude}')" class="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600">
+                                                <i class="fas fa-copy mr-1"></i> Kopyala
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+                        } else {
+                            historyContainer.innerHTML = '<p class="text-sm text-gray-500 text-center">Henüz paylaşılmış konum yok.</p>';
+}
        <div class="text-sm text-gray-600">
         Konum Paylaşımı
        </div>
@@ -1750,26 +1800,39 @@
             }
         }
 
-        async function trackLocationShare(profileId) {
-            try {
-                const docRef = window.firebaseServices.doc(window.firebaseDb, 'pets', profileId);
-                const docSnap = await window.firebaseServices.getDoc(docRef);
-                
-                if (docSnap.exists()) {
-                    const currentData = docSnap.data();
-                    const newLocationShareCount = (currentData.locationShareCount || 0) + 1;
-                    
-                    await window.firebaseServices.updateDoc(docRef, {
-                        locationShareCount: newLocationShareCount
-                    });
-                    
-                    console.log('Konum paylaşım sayısı güncellendi:', newLocationShareCount);
-                }
-            } catch (error) {
-                console.error('Konum istatistiği güncellenirken hata:', error);
-            }
-        }
+       async function trackLocationShare(profileId, lat, lng) {
+            try {
+                const docRef = window.firebaseServices.doc(window.firebaseDb, 'pets', profileId);
+                const docSnap = await window.firebaseServices.getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const currentData = docSnap.data();
+                    const newLocationShareCount = (currentData.locationShareCount || 0) + 1;
+                    
+                    const updateData = {
+                        locationShareCount: newLocationShareCount
+                    };
 
+                    // EĞER lat ve lng geldiyse, konumu geçmişe ekle
+                    if (lat && lng) {
+                        const newLocationEntry = {
+                            latitude: lat,
+                            longitude: lng,
+                            timestamp: new Date().toISOString()
+                        };
+                        const locationHistory = currentData.locationHistory || [];
+                        locationHistory.unshift(newLocationEntry); // Yeni konumu başa ekle
+                        updateData.locationHistory = locationHistory.slice(0, 20); // Geçmişi 20 kayıtla sınırla
+                    }
+
+                    await window.firebaseServices.updateDoc(docRef, updateData);
+                    
+                    console.log('Konum istatistiği güncellendi/kaydedildi.');
+                }
+            } catch (error) {
+                console.error('Konum istatistiği güncellenirken hata:', error);
+            }
+        }
         // İstatistik özetini güncelle
         function updateStatsOverview() {
             const totalProfiles = allProfiles.length;
@@ -2043,35 +2106,50 @@
         }
 
         // Konum paylaşımı - Herkes gönderebilir
-        function shareLocation() {
-            document.getElementById('locationModal').classList.remove('hidden');
-            
-            // Konum paylaşım sayısını artır (sadece profil sahibi için)
-            if (currentUser && currentProfile && currentProfile.id && currentProfile.userId === currentUser.uid) {
-                trackLocationShare(currentProfile.id);
-            }
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    async (position) => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        
-                        // Konumu Firebase'e kaydet
-                        await saveLocationToProfile(lat, lng);
-                        
-                        showLocationOptions(lat, lng);
-                    },
-                    (error) => {
-                        document.getElementById('locationContent').innerHTML = `
-                            <div class="text-center text-red-600">
-                                <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                                <p>Konum alınamadı</p>
-                                <p class="text-sm">Lütfen konum izni verin</p>
-                            </div>
-                        `;
-                    }
-                );
+function shareLocation() {
+            document.getElementById('locationModal').classList.remove('hidden');
+            
+            // Konum modalını sıfırla
+            document.getElementById('locationContent').innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-spinner fa-spin text-2xl text-purple-600 mb-2"></i>
+                    <p>Konum alınıyor...</p>
+                </div>
+            `;
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+
+                        // Konum alındıktan SONRA istatistiği ve geçmişi kaydet
+                        if (currentProfile && currentProfile.id) {
+                            trackLocationShare(currentProfile.id, lat, lng);
+                        }
+                        
+                        // Kullanıcıya harita seçeneklerini göster
+                        showLocationOptions(lat, lng);
+                    },
+                    (error) => {
+                        document.getElementById('locationContent').innerHTML = `
+                            <div class="text-center text-red-600">
+                                <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                                <p>Konum alınamadı</p>
+                                <p class="text-sm">Lütfen konum izni verin</p>
+                            </div>
+                        `;
+                    }
+                );
+            } else {
+                document.getElementById('locationContent').innerHTML = `
+                    <div class="text-center text-red-600">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p>Konum desteklenmiyor</p>
+                    </div>
+                `;
+            }
+        }
             } else {
                 document.getElementById('locationContent').innerHTML = `
                     <div class="text-center text-red-600">
@@ -2480,5 +2558,4 @@
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991efb52f3192a87',t:'MTc2MTAzMTExNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
 
