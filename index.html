@@ -186,56 +186,6 @@
         Konum Paylaşımı
        </div>
       </div>
-          <div id="locationHistory" class="mt-6">
-                        <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                            <i class="fas fa-history mr-2 text-orange-600"></i>Konum Geçmişi
-                        </h4>
-                        <div id="locationHistoryList" class="space-y-3 max-h-64 overflow-y-auto bg-gray-50 p-3 rounded-lg border">
-                                                    </div>
-                    </div>
-
-                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                    ```
-
-**B) Konum Geçmişi Listesini Doldurma:**
-Yine `displayProfile` fonksiyonu içinde, `if (currentUser && profile.userId === currentUser.uid)` bloğunu bulun. Bu bloğun içindeki `updateProfileStats(profile);` satırını bulun ve **hemen altına** aşağıdaki JavaScript kodunu ekleyin:
-
-```javascript
-                        updateProfileStats(profile);
-                        
-                        // YENİ: Konum Geçmişini Yükle
-                        const historyContainer = document.getElementById('locationHistoryList');
-                        if (profile.locationHistory && profile.locationHistory.length > 0) {
-                            historyContainer.innerHTML = profile.locationHistory.map(loc => {
-                                const date = new Date(loc.timestamp);
-                                const formattedDate = date.toLocaleDateString('tr-TR', {
-                                    day: '2-digit', month: '2-digit', year: 'numeric',s
-                                    hour: '2-digit', minute: '2-digit'
-                                });
-                                
-                                return `
-                                    <div class="bg-white p-3 rounded border border-gray-200">
-                                        <p class="text-sm font-semibold text-gray-700">${formattedDate}</p>
-                                        <p class="text-xs text-gray-500 mb-2">
-                                            Lat: ${loc.latitude.toFixed(6)}, Lng: ${loc.longitude.toFixed(6)}
-                                        </p>
-                                        <div class="flex flex-wrap gap-2">
-                                            <a href="https://maps.google.com/?q=${loc.latitude},${loc.longitude}" target="_blank" rel="noopener noreferrer" class="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">
-S                                             <i class="fab fa-google mr-1"></i> Google
-                                            </a>
-                                            <a href="https://www.yandex.com.tr/harita/?ll=${loc.longitude},${loc.latitude}&z=15" target="_blank" rel="noopener noreferrer" class="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-                                                Yandex
-                                            </a>
-                                            <button onclick="copyLocationText('${loc.latitude}', '${loc.longitude}')" class="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600">
-                                                <i class="fas fa-copy mr-1"></i> Kopyala
-                                            </button>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('');
-                        } else {
-                            historyContainer.innerHTML = '<p class="text-sm text-gray-500 text-center">Henüz paylaşılmış konum yok.</p>';
-}
      </div><!-- Profil Listesi -->
      <div class="mb-6">
       <div class="flex justify-between items-center mb-4">
@@ -1365,18 +1315,17 @@ S                                             <i class="fa
             const container = document.getElementById('profilesList');
             
             // İstatistik özetini güncelle
-            updateStatsOverview();
+     function updateStatsOverview() {
+            const totalProfiles = allProfiles.length;
+            const totalViews = allProfiles.reduce((sum, profile) => sum + (profile.viewCount || 0), 0);
+            const totalPhoneCalls = allProfiles.reduce((sum, profile) => sum + (profile.phoneClickCount || 0), 0);
+            const totalLocationShares = allProfiles.reduce((sum, profile) => sum + (profile.locationShareCount || 0), 0);
             
-            if (allProfiles.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-8 text-gray-500">
-                        <i class="fas fa-paw text-4xl mb-4"></i>
-                        <p>Henüz profil oluşturmadınız</p>
-                        <p class="text-sm">İlk hayvan profilinizi oluşturmak için "Profil Ekle" butonuna tıklayın</p>
-                    </div>
-                `;
-                return;
-            }
+            document.getElementById('totalProfiles').textContent = totalProfiles;
+            document.getElementById('totalViews').textContent = totalViews;
+            document.getElementById('totalPhoneCalls').textContent = totalPhoneCalls;
+            document.getElementById('totalLocationShares').textContent = totalLocationShares;
+        }
 
             container.innerHTML = allProfiles.map(profile => `
                 <div class="bg-white rounded-lg card-shadow p-4 hover:shadow-lg transition-shadow">
@@ -2177,4 +2126,5 @@ S                                             <i class="fa
     </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99203430d3bc2a87',t:'MTc2MTA0MzkyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
+
 
