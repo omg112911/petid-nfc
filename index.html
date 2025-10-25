@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pet NFC Yönetim Sistemi</title>
+  <title>Patilink Yönetim Sistemi</title>
   <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script type="module">
@@ -110,7 +110,7 @@
       <div class="flex items-center space-x-2">
        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center"><span class="text-white font-bold text-sm">🐾</span>
        </div>
-       <h1 id="site-title" class="text-xl font-bold text-gray-800">Pet NFC</h1>
+       <h1 id="site-title" class="text-xl font-bold text-gray-800">Patilink</h1>
       </div>
       <div id="nav-buttons" class="flex items-center space-x-4"><button id="login-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"> Giriş Yap </button> <button id="register-btn" class="border border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"> Kayıt Ol </button>
       </div>
@@ -122,7 +122,7 @@
      <h2 class="text-4xl font-bold text-gray-800 mb-4">Hoş Geldiniz</h2>
      <p id="welcome-message" class="text-xl text-gray-600 mb-8">Evcil hayvanınızın güvenliği için NFC çözümü</p>
      <div class="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
-      <h3 class="text-2xl font-semibold mb-4">Pet NFC Sistemi</h3>
+      <h3 class="text-2xl font-semibold mb-4">Patilink Sistemi</h3>
       <p class="text-gray-600 mb-6">NFC etiketlerinizi hayvan profillerinizle eşleştirin ve kayıp durumunda hızlı iletişim sağlayın.</p>
       <div class="grid md:grid-cols-3 gap-6">
        <div class="text-center">
@@ -182,6 +182,13 @@
       <h2 class="text-3xl font-bold text-gray-800">Hayvan Profillerim</h2>
       <div class="flex space-x-4"><button id="add-pet-btn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"> + Yeni Hayvan Ekle </button> <button id="logout-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"> Çıkış Yap </button>
       </div>
+     </div><!-- Pet Statistics Section -->
+     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h3 class="text-xl font-semibold mb-4">📊 Hayvan İstatistikleri</h3>
+      <div class="mb-4"><select id="user-stats-filter" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"> <option value="">Tüm Hayvanlarım</option> </select>
+      </div>
+      <div id="user-pet-statistics" class="space-y-6"><!-- User's pet statistics will be loaded here -->
+      </div>
      </div><!-- Pet Locations Section -->
      <div class="bg-white rounded-lg shadow-md p-6 mb-8">
       <h3 class="text-xl font-semibold mb-4">📍 Hayvanlarımın Konumları</h3>
@@ -196,7 +203,7 @@
     <div id="admin-dashboard" class="hidden">
      <div class="flex justify-between items-center mb-8">
       <h2 class="text-3xl font-bold text-gray-800">Admin Paneli</h2>
-      <div class="flex space-x-4"><button id="admin-add-user-btn" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"> + Kullanıcı Ekle </button> <button id="create-nfc-link-btn" class="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors"> + NFC Link Oluştur </button> <button id="nfc-writer-btn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"> 📱 NFC Yazıcı </button> <button id="admin-logout-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"> Çıkış Yap </button>
+      <div class="flex space-x-4"><button id="admin-add-user-btn" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors"> + Kullanıcı Ekle </button> <button id="bulk-nfc-manager-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"> 🏭 Toplu NFC Yönetimi </button> <button id="create-nfc-link-btn" class="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors"> + NFC Link Oluştur </button> <button id="nfc-writer-btn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"> 📱 NFC Yazıcı </button> <button id="admin-logout-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"> Çıkış Yap </button>
       </div>
      </div>
      <div class="grid lg:grid-cols-3 gap-8"><!-- Users Management -->
@@ -541,6 +548,73 @@
      </div>
     </form>
    </div>
+  </div><!-- Bulk NFC Manager Modal -->
+  <div id="bulk-nfc-manager-modal" class="modal">
+   <div class="bg-white rounded-lg p-8 max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <h3 class="text-2xl font-bold mb-6 flex items-center"><span class="text-3xl mr-3">🏭</span> Toplu NFC Yönetimi - Hızlı Üretim ve Yazma</h3>
+    <div class="grid lg:grid-cols-2 gap-8"><!-- Bulk Creation Section -->
+     <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+      <h4 class="text-xl font-semibold text-blue-800 mb-4">📦 Toplu NFC Link Üretimi</h4>
+      <p class="text-sm text-blue-700 mb-4">Atamaya hazır boş NFC linkler oluşturun. Bu linkler daha sonra hayvan profillerine atanabilir.</p>
+      <form id="bulk-create-form" class="space-y-4">
+       <div><label class="block text-gray-700 text-sm font-bold mb-2">Kaç adet NFC link oluşturulsun?</label> <input type="number" id="bulk-count" min="1" max="50" value="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+        <p class="text-xs text-gray-500 mt-1">Maksimum 50 adet tek seferde oluşturabilirsiniz</p>
+       </div>
+       <div><label class="block text-gray-700 text-sm font-bold mb-2">Link Adı Öneki</label> <input type="text" id="bulk-prefix" value="NFC Etiket" placeholder="NFC Etiket" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+        <p class="text-xs text-gray-500 mt-1">Örnek: "NFC Etiket #1", "NFC Etiket #2" şeklinde numaralanacak</p>
+       </div>
+       <div><label class="block text-gray-700 text-sm font-bold mb-2">Açıklama (İsteğe Bağlı)</label> <textarea id="bulk-description" rows="2" placeholder="Bu NFC etiketler toplu üretim ile oluşturulmuştur..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+       </div><button type="submit" id="bulk-create-btn" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold"> 🚀 Toplu Oluştur </button>
+      </form>
+      <div id="bulk-create-progress" class="hidden mt-4">
+       <div class="bg-white rounded-lg p-4 border">
+        <div class="flex items-center space-x-3 mb-2">
+         <div class="loading"></div><span class="font-semibold">NFC Linkler Oluşturuluyor...</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+         <div id="bulk-progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <p id="bulk-progress-text" class="text-sm text-gray-600 mt-2">0 / 0 tamamlandı</p>
+       </div>
+      </div>
+      <div id="bulk-create-result" class="hidden mt-4"><!-- Results will be shown here -->
+      </div>
+     </div><!-- Unassigned Links Management -->
+     <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+      <div class="flex justify-between items-center mb-4">
+       <h4 class="text-xl font-semibold text-green-800">📋 Atanmamış NFC Linkler</h4><button id="refresh-unassigned-btn" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"> 🔄 Yenile </button>
+      </div>
+      <div class="mb-4">
+       <div class="flex space-x-2"><input type="text" id="unassigned-search" placeholder="Link ara..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 text-sm"> <button id="select-all-unassigned" class="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm"> Tümünü Seç </button>
+       </div>
+      </div>
+      <div id="unassigned-links-container" class="space-y-2 max-h-96 overflow-y-auto"><!-- Unassigned links will be loaded here -->
+      </div>
+      <div class="mt-4 pt-4 border-t border-green-200">
+       <div class="flex justify-between items-center mb-3"><span class="text-sm font-semibold text-green-800">Seçili Linkler:</span> <span id="selected-count" class="bg-green-600 text-white px-2 py-1 rounded text-sm">0</span>
+       </div>
+       <div class="grid grid-cols-2 gap-2"><button id="bulk-write-selected" class="bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition-colors text-sm font-semibold"> 📱 Seçilileri NFC'ye Yaz </button> <button id="bulk-delete-selected" class="bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors text-sm font-semibold"> 🗑️ Seçilileri Sil </button>
+       </div>
+      </div>
+     </div>
+    </div><!-- Bulk NFC Writing Section -->
+    <div id="bulk-writing-section" class="hidden mt-8 bg-purple-50 border border-purple-200 rounded-lg p-6">
+     <h4 class="text-xl font-semibold text-purple-800 mb-4">📱 Toplu NFC Yazma İşlemi</h4>
+     <div id="bulk-write-queue" class="space-y-3 mb-6 max-h-60 overflow-y-auto"><!-- Write queue will be shown here -->
+     </div>
+     <div class="flex justify-between items-center">
+      <div class="text-sm text-purple-700"><span id="write-progress-text">0 / 0 yazıldı</span>
+      </div>
+      <div class="space-x-2"><button id="start-bulk-write" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors font-semibold"> ▶️ Yazmaya Başla </button> <button id="cancel-bulk-write" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors"> ❌ İptal </button>
+      </div>
+     </div>
+    </div>
+    <div class="flex justify-between mt-8 pt-6 border-t border-gray-200"><button type="button" id="close-bulk-nfc-manager-modal" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"> Kapat </button>
+     <div class="text-sm text-gray-500">
+      💡 İpucu: Önce linkler oluşturun, sonra seçerek toplu yazma yapın
+     </div>
+    </div>
+   </div>
   </div><!-- NFC Writer Modal -->
   <div id="nfc-writer-modal" class="modal">
    <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -613,7 +687,7 @@
 
         // Default configuration
         const defaultConfig = {
-            site_title: "Pet NFC",
+            site_title: "Patilink",
             welcome_message: "Evcil hayvanınızın güvenliği için NFC çözümü",
             contact_info: "info@petnfc.com"
         };
@@ -736,6 +810,7 @@
             document.getElementById('close-assign-nfc-link-modal').addEventListener('click', () => hideModal('assign-nfc-link-modal'));
             document.getElementById('close-add-user-modal').addEventListener('click', () => hideModal('add-user-modal'));
             document.getElementById('close-edit-pet-modal').addEventListener('click', () => hideModal('edit-pet-modal'));
+            document.getElementById('close-bulk-nfc-manager-modal').addEventListener('click', () => hideModal('bulk-nfc-manager-modal'));
             document.getElementById('close-nfc-writer-modal').addEventListener('click', () => hideModal('nfc-writer-modal'));
 
             // Forms
@@ -752,6 +827,7 @@
             document.getElementById('admin-logout-btn').addEventListener('click', handleLogout);
             document.getElementById('add-pet-btn').addEventListener('click', () => showModal('add-pet-modal'));
             document.getElementById('admin-add-user-btn').addEventListener('click', () => showModal('add-user-modal'));
+            document.getElementById('bulk-nfc-manager-btn').addEventListener('click', openBulkNFCManager);
             document.getElementById('create-nfc-link-btn').addEventListener('click', () => showModal('create-nfc-link-modal'));
             document.getElementById('nfc-writer-btn').addEventListener('click', openNFCWriter);
 
@@ -792,6 +868,9 @@
             
             // User location filter
             document.getElementById('user-location-filter').addEventListener('change', filterUserPetLocations);
+            
+            // User statistics filter
+            document.getElementById('user-stats-filter').addEventListener('change', filterUserPetStatistics);
 
             // NFC link kontrolü initializeAuth() içinde yapılıyor
         }
@@ -1060,6 +1139,9 @@
 
                 // Load user's pet locations - sadece kendi hayvanlarının konumları
                 await loadUserPetLocations();
+                
+                // Load user's pet statistics - sadece kendi hayvanlarının istatistikleri
+                await loadUserPetStatistics();
             } catch (error) {
                 showToast('Hayvan profilleri yüklenirken hata oluştu: ' + error.message, 'error');
             }
@@ -1681,7 +1763,7 @@
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-blue-800 mb-3">📋 Etiket Nasıl Aktifleştirilir?</h3>
                         <ol class="text-left text-blue-700 space-y-2">
-                            <li><strong>1.</strong> Pet NFC sistemine kayıt olun</li>
+                            <li><strong>1.</strong> Patilink sistemine kayıt olun</li>
                             <li><strong>2.</strong> Hayvan profilinizi oluşturun</li>
                             <li><strong>3.</strong> Admin ile iletişime geçin</li>
                             <li><strong>4.</strong> Etiketinizi hayvan profilinize atayın</li>
@@ -2944,7 +3026,7 @@
             displayUserPetLocations(filteredLocations);
         }
 
-        // Copy pet NFC link
+        // Copy Patilink link
         function copyPetNFCLink(url) {
             navigator.clipboard.writeText(url).then(() => {
                 showToast('Hayvan NFC linki kopyalandı!');
@@ -2952,6 +3034,774 @@
                 showToast('Link kopyalanamadı!', 'error');
             });
         }
+
+        // Load user pet statistics - SADECE KENDİ HAYVANLARININ İSTATİSTİKLERİ
+        async function loadUserPetStatistics() {
+            try {
+                // Kullanıcının hayvanlarını al
+                const petsQuery = window.firebaseModules.query(
+                    window.firebaseModules.collection(window.firebaseDb, 'pets'),
+                    window.firebaseModules.where('ownerId', '==', currentUser.uid)
+                );
+                const petsSnapshot = await window.firebaseModules.getDocs(petsQuery);
+                
+                const petStats = new Map();
+                const petNames = new Map();
+                
+                // Initialize pet stats
+                petsSnapshot.forEach((doc) => {
+                    const pet = doc.data();
+                    petNames.set(doc.id, pet.name);
+                    petStats.set(doc.id, {
+                        name: pet.name,
+                        species: pet.species,
+                        scans: 0,
+                        calls: 0,
+                        whatsapp: 0,
+                        locationsSent: 0,
+                        directionsRequested: 0,
+                        lastActivity: null,
+                        totalActivities: 0
+                    });
+                });
+
+                // Populate statistics filter dropdown
+                const statsFilterSelect = document.getElementById('user-stats-filter');
+                statsFilterSelect.innerHTML = '<option value="">Tüm Hayvanlarım</option>';
+                petNames.forEach((name, id) => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = name;
+                    statsFilterSelect.appendChild(option);
+                });
+
+                // Get activities for user's pets
+                const activitiesQuery = window.firebaseModules.query(
+                    window.firebaseModules.collection(window.firebaseDb, 'pet_activities')
+                );
+                const activitiesSnapshot = await window.firebaseModules.getDocs(activitiesQuery);
+                
+                // Process activities - sadece kendi hayvanlarının aktiviteleri
+                activitiesSnapshot.forEach((doc) => {
+                    const activity = doc.data();
+                    
+                    // Sadece kullanıcının hayvanlarının aktivitelerini say
+                    if (petStats.has(activity.petId)) {
+                        const stats = petStats.get(activity.petId);
+                        
+                        switch (activity.type) {
+                            case 'scan':
+                                stats.scans++;
+                                break;
+                            case 'call':
+                                stats.calls++;
+                                break;
+                            case 'whatsapp':
+                                stats.whatsapp++;
+                                break;
+                            case 'location_sent':
+                                stats.locationsSent++;
+                                break;
+                            case 'directions_requested':
+                                stats.directionsRequested++;
+                                break;
+                        }
+                        
+                        stats.totalActivities++;
+                        
+                        // Update last activity
+                        const activityDate = new Date(activity.timestamp);
+                        if (!stats.lastActivity || activityDate > stats.lastActivity) {
+                            stats.lastActivity = activityDate;
+                        }
+                    }
+                });
+
+                // Get location data for user's pets
+                const locationsQuery = window.firebaseModules.query(
+                    window.firebaseModules.collection(window.firebaseDb, 'locations'),
+                    window.firebaseModules.where('ownerId', '==', currentUser.uid)
+                );
+                const locationsSnapshot = await window.firebaseModules.getDocs(locationsQuery);
+                
+                // Count locations sent by NFC readers
+                locationsSnapshot.forEach((doc) => {
+                    const location = doc.data();
+                    if (petStats.has(location.petId) && location.sentBy === 'nfc_reader') {
+                        const stats = petStats.get(location.petId);
+                        stats.locationsSent++;
+                        stats.totalActivities++;
+                        
+                        const locationDate = new Date(location.timestamp);
+                        if (!stats.lastActivity || locationDate > stats.lastActivity) {
+                            stats.lastActivity = locationDate;
+                        }
+                    }
+                });
+
+                // Convert to array and sort by total activities
+                const statsArray = Array.from(petStats.values()).sort((a, b) => b.totalActivities - a.totalActivities);
+
+                displayUserPetStatistics(statsArray);
+                window.userAllStatistics = statsArray; // Store for filtering
+                
+            } catch (error) {
+                showToast('İstatistikler yüklenirken hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        // Display user pet statistics
+        function displayUserPetStatistics(statistics) {
+            const statisticsContainer = document.getElementById('user-pet-statistics');
+            statisticsContainer.innerHTML = '';
+
+            if (statistics.length === 0) {
+                statisticsContainer.innerHTML = '<p class="text-gray-500 text-center py-4">Henüz hayvan profiliniz yok veya aktivite kaydı bulunmuyor.</p>';
+                return;
+            }
+
+            statistics.forEach((stats) => {
+                const statsItem = document.createElement('div');
+                statsItem.className = 'bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200';
+                
+                const lastActivityText = stats.lastActivity 
+                    ? stats.lastActivity.toLocaleString('tr-TR')
+                    : 'Henüz aktivite yok';
+
+                const totalInteractions = stats.calls + stats.whatsapp + stats.locationsSent + stats.directionsRequested;
+
+                statsItem.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-3xl">${getAnimalEmoji(stats.species)}</span>
+                            <div>
+                                <h4 class="text-xl font-bold text-gray-800">${stats.name}</h4>
+                                <p class="text-sm text-gray-600">${stats.species}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                ${stats.totalActivities} Toplam Aktivite
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div class="text-center bg-white rounded-lg p-3 shadow-sm">
+                            <div class="text-2xl font-bold text-blue-600">${stats.scans}</div>
+                            <div class="text-xs text-gray-600">👁️ Profil Görüntüleme</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-3 shadow-sm">
+                            <div class="text-2xl font-bold text-green-600">${stats.calls}</div>
+                            <div class="text-xs text-gray-600">📞 Telefon Araması</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-3 shadow-sm">
+                            <div class="text-2xl font-bold text-green-500">${stats.whatsapp}</div>
+                            <div class="text-xs text-gray-600">💬 WhatsApp Mesajı</div>
+                        </div>
+                        <div class="text-center bg-white rounded-lg p-3 shadow-sm">
+                            <div class="text-2xl font-bold text-purple-600">${stats.locationsSent}</div>
+                            <div class="text-xs text-gray-600">📍 Konum Gönderimi</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="bg-white rounded-lg p-3 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600">🗺️ Yol Tarifi İsteği</span>
+                                <span class="font-bold text-orange-600">${stats.directionsRequested}</span>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-600">🤝 Toplam Etkileşim</span>
+                                <span class="font-bold text-red-600">${totalInteractions}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-3 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">🕒 Son Aktivite</span>
+                            <span class="text-sm font-medium ${stats.lastActivity ? 'text-gray-800' : 'text-gray-500'}">${lastActivityText}</span>
+                        </div>
+                    </div>
+
+                    ${stats.totalActivities > 0 ? `
+                        <div class="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                            <p class="text-sm text-green-800">
+                                <strong>🎉 Harika!</strong> ${stats.name} toplam <strong>${stats.scans}</strong> kez görüntülendi ve <strong>${totalInteractions}</strong> kişi sizinle iletişime geçti!
+                            </p>
+                        </div>
+                    ` : `
+                        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-sm text-blue-800">
+                                <strong>💡 Bilgi:</strong> ${stats.name} henüz NFC etiket ile taranmamış.
+                            </p>
+                        </div>
+                    `}
+                `;
+                
+                statisticsContainer.appendChild(statsItem);
+            });
+        }
+
+        // Filter user pet statistics
+        function filterUserPetStatistics() {
+            const selectedPetId = document.getElementById('user-stats-filter').value;
+            
+            if (!window.userAllStatistics) return;
+
+            let filteredStatistics = window.userAllStatistics;
+            if (selectedPetId) {
+                // Find the specific pet's statistics
+                const petStats = window.userAllStatistics.find(stats => {
+                    // We need to match by name since we don't store ID in stats
+                    // Get the pet name from the select option
+                    const selectElement = document.getElementById('user-stats-filter');
+                    const selectedOption = selectElement.options[selectElement.selectedIndex];
+                    return stats.name === selectedOption.textContent;
+                });
+                
+                filteredStatistics = petStats ? [petStats] : [];
+            }
+
+            displayUserPetStatistics(filteredStatistics);
+        }
+
+        // Bulk NFC Manager Functions
+        async function openBulkNFCManager() {
+            showModal('bulk-nfc-manager-modal');
+            await loadUnassignedLinks();
+            setupBulkNFCEventListeners();
+        }
+
+        function setupBulkNFCEventListeners() {
+            // Bulk creation form
+            document.getElementById('bulk-create-form').addEventListener('submit', handleBulkCreate);
+            
+            // Unassigned links management
+            document.getElementById('refresh-unassigned-btn').addEventListener('click', loadUnassignedLinks);
+            document.getElementById('unassigned-search').addEventListener('input', filterUnassignedLinks);
+            document.getElementById('select-all-unassigned').addEventListener('click', toggleSelectAllUnassigned);
+            
+            // Bulk actions
+            document.getElementById('bulk-write-selected').addEventListener('click', startBulkWriting);
+            document.getElementById('bulk-delete-selected').addEventListener('click', bulkDeleteSelected);
+            
+            // Bulk writing controls
+            document.getElementById('start-bulk-write').addEventListener('click', executeBulkWrite);
+            document.getElementById('cancel-bulk-write').addEventListener('click', cancelBulkWrite);
+        }
+
+        async function handleBulkCreate(e) {
+            e.preventDefault();
+            
+            const count = parseInt(document.getElementById('bulk-count').value);
+            const prefix = document.getElementById('bulk-prefix').value || 'NFC Etiket';
+            const description = document.getElementById('bulk-description').value;
+            const submitBtn = document.getElementById('bulk-create-btn');
+            
+            if (count < 1 || count > 50) {
+                showToast('Link sayısı 1-50 arasında olmalıdır!', 'error');
+                return;
+            }
+
+            // Show progress
+            document.getElementById('bulk-create-progress').classList.remove('hidden');
+            document.getElementById('bulk-create-result').classList.add('hidden');
+            submitBtn.disabled = true;
+
+            const progressBar = document.getElementById('bulk-progress-bar');
+            const progressText = document.getElementById('bulk-progress-text');
+            
+            let created = 0;
+            const createdLinks = [];
+
+            try {
+                for (let i = 1; i <= count; i++) {
+                    // Generate unique link ID
+                    const linkId = 'nfc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    
+                    const linkData = {
+                        name: `${prefix} #${i}`,
+                        description: description || `Toplu üretim - ${new Date().toLocaleDateString('tr-TR')}`,
+                        linkId: linkId,
+                        url: `${window.location.origin}${window.location.pathname}?link=${linkId}`,
+                        createdAt: new Date().toISOString(),
+                        createdBy: currentUser.uid,
+                        isAssigned: false,
+                        petId: null,
+                        userId: null,
+                        bulkCreated: true,
+                        bulkBatch: Date.now()
+                    };
+
+                    const docRef = await window.firebaseModules.addDoc(
+                        window.firebaseModules.collection(window.firebaseDb, 'nfc_links'),
+                        linkData
+                    );
+
+                    createdLinks.push({ id: docRef.id, ...linkData });
+                    created++;
+
+                    // Update progress
+                    const progress = (created / count) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `${created} / ${count} tamamlandı`;
+
+                    // Small delay to show progress
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                // Show success result
+                document.getElementById('bulk-create-progress').classList.add('hidden');
+                const resultDiv = document.getElementById('bulk-create-result');
+                resultDiv.className = 'mt-4 bg-green-50 border border-green-200 rounded-lg p-4';
+                resultDiv.innerHTML = `
+                    <div class="flex items-center space-x-3 mb-3">
+                        <span class="text-2xl">✅</span>
+                        <div>
+                            <h5 class="font-semibold text-green-800">Toplu Oluşturma Başarılı!</h5>
+                            <p class="text-sm text-green-700">${count} adet NFC link başarıyla oluşturuldu.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <button onclick="copyAllCreatedLinks(${JSON.stringify(createdLinks).replace(/"/g, '&quot;')})" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors">
+                            📋 Tüm Linkleri Kopyala
+                        </button>
+                        <button onclick="downloadCreatedLinks(${JSON.stringify(createdLinks).replace(/"/g, '&quot;')})" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors ml-2">
+                            💾 CSV İndir
+                        </button>
+                    </div>
+                `;
+                resultDiv.classList.remove('hidden');
+
+                showToast(`${count} adet NFC link başarıyla oluşturuldu!`);
+                
+                // Refresh unassigned links list
+                await loadUnassignedLinks();
+
+            } catch (error) {
+                showToast('Toplu oluşturma sırasında hata oluştu: ' + error.message, 'error');
+                
+                // Show error result
+                document.getElementById('bulk-create-progress').classList.add('hidden');
+                const resultDiv = document.getElementById('bulk-create-result');
+                resultDiv.className = 'mt-4 bg-red-50 border border-red-200 rounded-lg p-4';
+                resultDiv.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="text-2xl">❌</span>
+                        <div>
+                            <h5 class="font-semibold text-red-800">Hata Oluştu</h5>
+                            <p class="text-sm text-red-700">${created} / ${count} link oluşturuldu. Hata: ${error.message}</p>
+                        </div>
+                    </div>
+                `;
+                resultDiv.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function loadUnassignedLinks() {
+            try {
+                const q = window.firebaseModules.query(
+                    window.firebaseModules.collection(window.firebaseDb, 'nfc_links'),
+                    window.firebaseModules.where('isAssigned', '==', false)
+                );
+                const querySnapshot = await window.firebaseModules.getDocs(q);
+                
+                window.unassignedLinks = [];
+                querySnapshot.forEach((doc) => {
+                    const link = doc.data();
+                    link.id = doc.id;
+                    window.unassignedLinks.push(link);
+                });
+
+                // Sort by creation date (newest first)
+                window.unassignedLinks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                displayUnassignedLinks(window.unassignedLinks);
+                
+            } catch (error) {
+                showToast('Atanmamış linkler yüklenirken hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        function displayUnassignedLinks(links) {
+            const container = document.getElementById('unassigned-links-container');
+            container.innerHTML = '';
+
+            if (links.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="text-4xl mb-2">📦</div>
+                        <p>Atanmamış NFC link bulunamadı</p>
+                        <p class="text-sm">Yukarıdan yeni linkler oluşturabilirsiniz</p>
+                    </div>
+                `;
+                return;
+            }
+
+            links.forEach((link) => {
+                const linkItem = document.createElement('div');
+                linkItem.className = 'bg-white border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors';
+                
+                const createdDate = new Date(link.createdAt).toLocaleDateString('tr-TR');
+                const isBulkCreated = link.bulkCreated ? '🏭' : '📱';
+                
+                linkItem.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" class="unassigned-checkbox" data-link-id="${link.id}" data-link-url="${link.url}">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg">${isBulkCreated}</span>
+                                <h5 class="font-semibold text-sm">${link.name}</h5>
+                            </div>
+                            <p class="text-xs text-gray-600">${link.description || 'Açıklama yok'}</p>
+                            <p class="text-xs text-gray-500">ID: ${link.linkId} • ${createdDate}</p>
+                        </div>
+                        <div class="flex space-x-1">
+                            <button onclick="copyNFCLink('${link.url}')" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600 transition-colors">
+                                📋
+                            </button>
+                            <button onclick="deleteUnassignedLink('${link.id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 transition-colors">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(linkItem);
+            });
+
+            updateSelectedCount();
+            
+            // Add event listeners for checkboxes
+            document.querySelectorAll('.unassigned-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedCount);
+            });
+        }
+
+        function filterUnassignedLinks() {
+            const searchTerm = document.getElementById('unassigned-search').value.toLowerCase();
+            
+            if (!window.unassignedLinks) return;
+
+            const filteredLinks = window.unassignedLinks.filter(link => 
+                link.name.toLowerCase().includes(searchTerm) ||
+                link.linkId.toLowerCase().includes(searchTerm) ||
+                (link.description && link.description.toLowerCase().includes(searchTerm))
+            );
+
+            displayUnassignedLinks(filteredLinks);
+        }
+
+        function toggleSelectAllUnassigned() {
+            const checkboxes = document.querySelectorAll('.unassigned-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !allChecked;
+            });
+            
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const selectedCheckboxes = document.querySelectorAll('.unassigned-checkbox:checked');
+            const count = selectedCheckboxes.length;
+            
+            document.getElementById('selected-count').textContent = count;
+            
+            // Enable/disable bulk action buttons
+            const writeBtn = document.getElementById('bulk-write-selected');
+            const deleteBtn = document.getElementById('bulk-delete-selected');
+            
+            writeBtn.disabled = count === 0;
+            deleteBtn.disabled = count === 0;
+            
+            if (count === 0) {
+                writeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                deleteBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                writeBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                deleteBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function startBulkWriting() {
+            const selectedCheckboxes = document.querySelectorAll('.unassigned-checkbox:checked');
+            
+            if (selectedCheckboxes.length === 0) {
+                showToast('Lütfen yazılacak linkleri seçin!', 'error');
+                return;
+            }
+
+            if (!('NDEFReader' in window)) {
+                showToast('Bu cihaz NFC yazmayı desteklemiyor! Android Chrome gereklidir.', 'error');
+                return;
+            }
+
+            // Prepare write queue
+            window.bulkWriteQueue = Array.from(selectedCheckboxes).map(checkbox => ({
+                id: checkbox.dataset.linkId,
+                url: checkbox.dataset.linkUrl,
+                name: checkbox.parentElement.querySelector('h5').textContent,
+                status: 'waiting' // waiting, writing, success, error
+            }));
+
+            displayBulkWriteQueue();
+            document.getElementById('bulk-writing-section').classList.remove('hidden');
+        }
+
+        function displayBulkWriteQueue() {
+            const container = document.getElementById('bulk-write-queue');
+            container.innerHTML = '';
+
+            window.bulkWriteQueue.forEach((item, index) => {
+                const queueItem = document.createElement('div');
+                queueItem.className = 'flex items-center justify-between bg-white border rounded-lg p-3';
+                queueItem.id = `queue-item-${index}`;
+                
+                const statusIcon = getWriteStatusIcon(item.status);
+                const statusText = getWriteStatusText(item.status);
+                
+                queueItem.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xl">${statusIcon}</span>
+                        <div>
+                            <p class="font-semibold text-sm">${item.name}</p>
+                            <p class="text-xs text-gray-600 break-all">${item.url}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-medium status-text">${statusText}</span>
+                    </div>
+                `;
+                
+                container.appendChild(queueItem);
+            });
+
+            updateWriteProgress();
+        }
+
+        function getWriteStatusIcon(status) {
+            const icons = {
+                'waiting': '⏳',
+                'writing': '📱',
+                'success': '✅',
+                'error': '❌'
+            };
+            return icons[status] || '❓';
+        }
+
+        function getWriteStatusText(status) {
+            const texts = {
+                'waiting': 'Bekliyor',
+                'writing': 'Yazılıyor...',
+                'success': 'Başarılı',
+                'error': 'Hata'
+            };
+            return texts[status] || 'Bilinmiyor';
+        }
+
+        function updateWriteProgress() {
+            const total = window.bulkWriteQueue.length;
+            const completed = window.bulkWriteQueue.filter(item => 
+                item.status === 'success' || item.status === 'error'
+            ).length;
+            
+            document.getElementById('write-progress-text').textContent = `${completed} / ${total} yazıldı`;
+        }
+
+        async function executeBulkWrite() {
+            if (!window.bulkWriteQueue || window.bulkWriteQueue.length === 0) {
+                showToast('Yazılacak link bulunamadı!', 'error');
+                return;
+            }
+
+            const startBtn = document.getElementById('start-bulk-write');
+            startBtn.disabled = true;
+            startBtn.innerHTML = '⏳ Yazılıyor...';
+
+            try {
+                const ndef = new NDEFReader();
+                
+                for (let i = 0; i < window.bulkWriteQueue.length; i++) {
+                    const item = window.bulkWriteQueue[i];
+                    
+                    // Update status to writing
+                    item.status = 'writing';
+                    updateQueueItemDisplay(i);
+                    
+                    try {
+                        // Show instruction for current item
+                        showToast(`${item.name} için NFC etiketini yaklaştırın...`, 'info');
+                        
+                        await ndef.write({
+                            records: [{
+                                recordType: "url",
+                                data: item.url
+                            }]
+                        });
+                        
+                        item.status = 'success';
+                        showToast(`${item.name} başarıyla yazıldı!`);
+                        
+                    } catch (error) {
+                        item.status = 'error';
+                        item.error = error.message;
+                        showToast(`${item.name} yazılırken hata: ${error.message}`, 'error');
+                    }
+                    
+                    updateQueueItemDisplay(i);
+                    updateWriteProgress();
+                    
+                    // Small delay between writes
+                    if (i < window.bulkWriteQueue.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+
+                const successCount = window.bulkWriteQueue.filter(item => item.status === 'success').length;
+                const errorCount = window.bulkWriteQueue.filter(item => item.status === 'error').length;
+                
+                showToast(`Toplu yazma tamamlandı! ${successCount} başarılı, ${errorCount} hata.`);
+                
+            } catch (error) {
+                showToast('Toplu yazma sırasında hata oluştu: ' + error.message, 'error');
+            } finally {
+                startBtn.disabled = false;
+                startBtn.innerHTML = '▶️ Yazmaya Başla';
+            }
+        }
+
+        function updateQueueItemDisplay(index) {
+            const item = window.bulkWriteQueue[index];
+            const queueItem = document.getElementById(`queue-item-${index}`);
+            
+            if (queueItem) {
+                const statusIcon = getWriteStatusIcon(item.status);
+                const statusText = getWriteStatusText(item.status);
+                
+                queueItem.querySelector('span').textContent = statusIcon;
+                queueItem.querySelector('.status-text').textContent = statusText;
+                
+                // Update colors based on status
+                queueItem.className = `flex items-center justify-between border rounded-lg p-3 ${
+                    item.status === 'success' ? 'bg-green-50 border-green-200' :
+                    item.status === 'error' ? 'bg-red-50 border-red-200' :
+                    item.status === 'writing' ? 'bg-blue-50 border-blue-200' :
+                    'bg-white border-gray-200'
+                }`;
+            }
+        }
+
+        function cancelBulkWrite() {
+            document.getElementById('bulk-writing-section').classList.add('hidden');
+            window.bulkWriteQueue = [];
+        }
+
+        async function bulkDeleteSelected() {
+            const selectedCheckboxes = document.querySelectorAll('.unassigned-checkbox:checked');
+            
+            if (selectedCheckboxes.length === 0) {
+                showToast('Lütfen silinecek linkleri seçin!', 'error');
+                return;
+            }
+
+            const confirmDiv = document.createElement('div');
+            confirmDiv.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            confirmDiv.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+                    <h4 class="text-lg font-semibold mb-3">⚠️ Toplu Silme Onayı</h4>
+                    <p class="text-gray-600 mb-4">${selectedCheckboxes.length} adet NFC link silinecek. Bu işlem geri alınamaz!</p>
+                    <div class="flex space-x-3">
+                        <button id="confirm-bulk-delete" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                            Evet, Sil
+                        </button>
+                        <button id="cancel-bulk-delete" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                            İptal
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(confirmDiv);
+
+            document.getElementById('confirm-bulk-delete').addEventListener('click', async () => {
+                document.body.removeChild(confirmDiv);
+                
+                try {
+                    let deleted = 0;
+                    for (const checkbox of selectedCheckboxes) {
+                        const linkId = checkbox.dataset.linkId;
+                        await window.firebaseModules.deleteDoc(
+                            window.firebaseModules.doc(window.firebaseDb, 'nfc_links', linkId)
+                        );
+                        deleted++;
+                    }
+
+                    showToast(`${deleted} adet NFC link başarıyla silindi!`);
+                    await loadUnassignedLinks();
+                    
+                } catch (error) {
+                    showToast('Toplu silme sırasında hata oluştu: ' + error.message, 'error');
+                }
+            });
+
+            document.getElementById('cancel-bulk-delete').addEventListener('click', () => {
+                document.body.removeChild(confirmDiv);
+            });
+        }
+
+        async function deleteUnassignedLink(linkId) {
+            try {
+                await window.firebaseModules.deleteDoc(
+                    window.firebaseModules.doc(window.firebaseDb, 'nfc_links', linkId)
+                );
+                showToast('NFC link silindi!');
+                await loadUnassignedLinks();
+            } catch (error) {
+                showToast('Link silinirken hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        // Utility functions for bulk operations
+        function copyAllCreatedLinks(links) {
+            const linkTexts = links.map(link => `${link.name}: ${link.url}`).join('\n');
+            navigator.clipboard.writeText(linkTexts).then(() => {
+                showToast('Tüm linkler kopyalandı!');
+            }).catch(() => {
+                showToast('Linkler kopyalanamadı!', 'error');
+            });
+        }
+
+        function downloadCreatedLinks(links) {
+            const csvContent = [
+                'Ad,Link ID,URL,Oluşturma Tarihi,Açıklama',
+                ...links.map(link => 
+                    `"${link.name}","${link.linkId}","${link.url}","${new Date(link.createdAt).toLocaleString('tr-TR')}","${link.description || ''}"`
+                )
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `nfc_links_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Make utility functions globally accessible
+        window.copyAllCreatedLinks = copyAllCreatedLinks;
+        window.downloadCreatedLinks = downloadCreatedLinks;
+        window.deleteUnassignedLink = deleteUnassignedLink;
 
         // NFC Writer Functions
         async function openNFCWriter() {
@@ -3400,5 +4250,5 @@
             }
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99436d7733216942',t:'MTc2MTQxMzI3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9943789135fcdb27',t:'MTc2MTQxMzczMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
