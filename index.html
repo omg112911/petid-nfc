@@ -687,18 +687,20 @@
 
         async function checkUserRole(uid) {
             try {
-                // Test admin user - admin@test.com şifresi: admin123
-                if (currentUser.email === 'admin@test.com') {
+                // Ana admin user - admin@patilink.com
+                if (currentUser.email === 'admin@patilink.com') {
                     isAdmin = true;
+                    window.isSuperAdmin = true; // Ana admin işareti
                     // Create admin user document if it doesn't exist
                     try {
                         await window.firebaseModules.setDoc(
                             window.firebaseModules.doc(window.firebaseDb, 'users', uid),
                             {
-                                name: 'Test Admin',
-                                email: 'admin@test.com',
+                                name: 'Ana Admin',
+                                email: 'admin@patilink.com',
                                 phone: '+90 555 000 0000',
                                 isAdmin: true,
+                                isSuperAdmin: true,
                                 createdAt: new Date().toISOString()
                             }
                         );
@@ -713,10 +715,12 @@
                 );
                 if (userDoc.exists()) {
                     isAdmin = userDoc.data().isAdmin || false;
+                    window.isSuperAdmin = userDoc.data().isSuperAdmin || false;
                 }
             } catch (error) {
                 console.error('Error checking user role:', error);
                 isAdmin = false;
+                window.isSuperAdmin = false;
             }
         }
 
@@ -847,7 +851,8 @@
             document.getElementById('nav-buttons').innerHTML = `
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-600">Hoş geldin, ${currentUser.email}</span>
-                    ${isAdmin ? '<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">ADMIN</span>' : ''}
+                    ${window.isSuperAdmin ? '<span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-semibold">ANA ADMİN</span>' : 
+                      isAdmin ? '<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-semibold">ADMIN</span>' : ''}
                 </div>
             `;
         }
@@ -1793,7 +1798,9 @@
 
                 querySnapshot.forEach((doc) => {
                     const user = doc.data();
-                    if (!user.isAdmin) { // Don't show admin users in assignment
+                    
+                    // Normal kullanıcıları göster, adminleri sadece ana admin görebilir
+                    if (!user.isAdmin || (window.isSuperAdmin && user.email !== currentUser.email)) {
                         const option = document.createElement('option');
                         option.value = doc.id;
                         option.textContent = `${user.name} (${user.email})`;
@@ -2391,6 +2398,12 @@
 
                 querySnapshot.forEach((doc) => {
                     const user = doc.data();
+                    
+                    // Eğer ana admin değilse, diğer adminleri gösterme
+                    if (!window.isSuperAdmin && user.isAdmin && user.email !== currentUser.email) {
+                        return; // Bu admin kullanıcısını atla
+                    }
+                    
                     const option = document.createElement('option');
                     option.value = doc.id;
                     option.textContent = `${user.name} (${user.email})`;
@@ -2753,13 +2766,27 @@
 
                 querySnapshot.forEach((doc) => {
                     const user = doc.data();
+                    
+                    // Eğer ana admin değilse, diğer adminleri gösterme
+                    if (!window.isSuperAdmin && user.isAdmin && user.email !== currentUser.email) {
+                        return; // Bu admin kullanıcısını atla
+                    }
+                    
                     const userItem = document.createElement('div');
                     userItem.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg';
+                    
+                    let roleText = 'Kullanıcı';
+                    if (user.isSuperAdmin) {
+                        roleText = 'Ana Admin';
+                    } else if (user.isAdmin) {
+                        roleText = 'Admin';
+                    }
+                    
                     userItem.innerHTML = `
                         <div>
                             <p class="font-semibold">${user.name}</p>
                             <p class="text-sm text-gray-600">${user.email}</p>
-                            <p class="text-xs text-gray-500">${user.isAdmin ? 'Admin' : 'Kullanıcı'}</p>
+                            <p class="text-xs text-gray-500">${roleText}</p>
                         </div>
                         <div class="text-sm text-gray-500">
                             ${user.phone}
@@ -2969,6 +2996,12 @@
 
                 querySnapshot.forEach((doc) => {
                     const user = doc.data();
+                    
+                    // Eğer ana admin değilse, diğer adminleri gösterme
+                    if (!window.isSuperAdmin && user.isAdmin && user.email !== currentUser.email) {
+                        return; // Bu admin kullanıcısını atla
+                    }
+                    
                     const option = document.createElement('option');
                     option.value = doc.id;
                     option.textContent = `${user.name} (${user.email})`;
@@ -3367,5 +3400,5 @@
             }
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99435fcf43d66942',t:'MTc2MTQxMjcxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99436d7733216942',t:'MTc2MTQxMzI3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
