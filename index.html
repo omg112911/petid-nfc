@@ -3,10 +3,25 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Patilink Yönetim Sistemi</title>
+  <title>Pet NFC Yönetim Sistemi</title>
   <script src="/_sdk/element_sdk.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
- firebase
+  <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZSnh9jWibR4a0Pc6RKBDYlGZNXP_Tiu8",
+            authDomain: "petnfc-46178.firebaseapp.com",
+            databaseURL: "https://petnfc-46178-default-rtdb.firebaseio.com",
+            projectId: "petnfc-46178",
+            storageBucket: "petnfc-46178.firebasestorage.app",
+            messagingSenderId: "942096749783",
+            appId: "1:942096749783:web:afcd7f8e4f4f109f3c4c92",
+            measurementId: "G-XS8LXGR545"
+        };
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -95,7 +110,7 @@
       <div class="flex items-center space-x-2">
        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center"><span class="text-white font-bold text-sm">🐾</span>
        </div>
-       <h1 id="site-title" class="text-xl font-bold text-gray-800">Patilink</h1>
+       <h1 id="site-title" class="text-xl font-bold text-gray-800">Pet NFC</h1>
       </div>
       <div id="nav-buttons" class="flex items-center space-x-4"><button id="login-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"> Giriş Yap </button> <button id="register-btn" class="border border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"> Kayıt Ol </button>
       </div>
@@ -107,7 +122,7 @@
      <h2 class="text-4xl font-bold text-gray-800 mb-4">Hoş Geldiniz</h2>
      <p id="welcome-message" class="text-xl text-gray-600 mb-8">Evcil hayvanınızın güvenliği için NFC çözümü</p>
      <div class="bg-white rounded-lg shadow-md p-8 max-w-2xl mx-auto">
-      <h3 class="text-2xl font-semibold mb-4">Patilink Sistemi</h3>
+      <h3 class="text-2xl font-semibold mb-4">Pet NFC Sistemi</h3>
       <p class="text-gray-600 mb-6">NFC etiketlerinizi hayvan profillerinizle eşleştirin ve kayıp durumunda hızlı iletişim sağlayın.</p>
       <div class="grid md:grid-cols-3 gap-6">
        <div class="text-center">
@@ -598,7 +613,7 @@
 
         // Default configuration
         const defaultConfig = {
-            site_title: "Patilink",
+            site_title: "Pet NFC",
             welcome_message: "Evcil hayvanınızın güvenliği için NFC çözümü",
             contact_info: "info@petnfc.com"
         };
@@ -1602,9 +1617,11 @@
                 }
                 
                 const linkData = linkSnapshot.docs[0].data();
+                const linkDocId = linkSnapshot.docs[0].id;
                 
                 if (!linkData.isAssigned || !linkData.petId) {
-                    showToast('Bu NFC link henüz bir hayvana atanmamış!', 'error');
+                    // Boş NFC etiket - Admin kontrolü yap
+                    await handleEmptyNFCTag(linkId, linkDocId, linkData);
                     return;
                 }
                 
@@ -1613,6 +1630,342 @@
                 
             } catch (error) {
                 showToast('NFC link kontrol edilirken hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        // Handle empty NFC tag - Admin assignment interface
+        async function handleEmptyNFCTag(linkId, linkDocId, linkData) {
+            try {
+                // Check if current user is admin
+                if (!currentUser) {
+                    showEmptyNFCMessage();
+                    return;
+                }
+
+                await checkUserRole(currentUser.uid);
+                
+                if (!isAdmin) {
+                    showEmptyNFCMessage();
+                    return;
+                }
+
+                // Show admin assignment interface
+                showAdminNFCAssignment(linkId, linkDocId, linkData);
+                
+            } catch (error) {
+                showEmptyNFCMessage();
+            }
+        }
+
+        // Show message for non-admin users
+        function showEmptyNFCMessage() {
+            document.getElementById('welcome-section').classList.add('hidden');
+            document.getElementById('user-dashboard').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('pet-profile-page').classList.remove('hidden');
+
+            // Show empty NFC message
+            document.getElementById('pet-profile-page').innerHTML = `
+                <div class="bg-white rounded-lg shadow-lg p-8 max-w-2xl mx-auto text-center">
+                    <div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-4xl">📱</span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-4">Boş NFC Etiket</h1>
+                    <p class="text-xl text-gray-600 mb-6">Bu NFC etiket henüz bir hayvan profiline atanmamış.</p>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-3">📋 Etiket Nasıl Aktifleştirilir?</h3>
+                        <ol class="text-left text-blue-700 space-y-2">
+                            <li><strong>1.</strong> Pet NFC sistemine kayıt olun</li>
+                            <li><strong>2.</strong> Hayvan profilinizi oluşturun</li>
+                            <li><strong>3.</strong> Admin ile iletişime geçin</li>
+                            <li><strong>4.</strong> Etiketinizi hayvan profilinize atayın</li>
+                        </ol>
+                    </div>
+
+                    <div class="space-y-4">
+                        <button onclick="backToHome()" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                            Ana Sayfaya Git
+                        </button>
+                        <p class="text-sm text-gray-500">
+                            Yardım için: <a href="mailto:info@petnfc.com" class="text-blue-600 hover:underline">info@petnfc.com</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show admin NFC assignment interface
+        async function showAdminNFCAssignment(linkId, linkDocId, linkData) {
+            document.getElementById('welcome-section').classList.add('hidden');
+            document.getElementById('user-dashboard').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.add('hidden');
+            document.getElementById('pet-profile-page').classList.remove('hidden');
+
+            // Show admin assignment interface
+            document.getElementById('pet-profile-page').innerHTML = `
+                <div class="bg-white rounded-lg shadow-lg p-8 max-w-4xl mx-auto">
+                    <div class="text-center mb-8">
+                        <div class="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-4xl">🔧</span>
+                        </div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Admin: NFC Etiket Atama</h1>
+                        <p class="text-xl text-gray-600">Bu NFC etiket henüz atanmamış - Hayvan profili seçin</p>
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                            <p class="text-sm text-gray-600"><strong>NFC Link:</strong> ${linkData.name || 'İsimsiz Etiket'}</p>
+                            <p class="text-xs text-gray-500">Link ID: ${linkId}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- Assignment Form -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                            <h3 class="text-lg font-semibold text-blue-800 mb-4">📋 Profil Atama</h3>
+                            <form id="quick-assign-form">
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Kullanıcı Seç</label>
+                                    <select id="quick-assign-user" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required>
+                                        <option value="">Kullanıcı seçiniz...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">Hayvan Seç</label>
+                                    <select id="quick-assign-pet" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" required disabled>
+                                        <option value="">Önce kullanıcı seçiniz...</option>
+                                    </select>
+                                </div>
+                                <button type="submit" id="quick-assign-btn" class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                                    🔗 NFC Etiketini Ata
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Selected Pet Preview -->
+                        <div id="quick-assign-preview" class="bg-gray-50 border border-gray-200 rounded-lg p-6 hidden">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">👁️ Profil Önizleme</h3>
+                            <div id="quick-assign-pet-info">
+                                <!-- Pet info will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-gray-200 flex justify-between">
+                        <button onclick="backToHome()" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                            ← Ana Sayfaya Dön
+                        </button>
+                        <button onclick="openAdminPanel()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            🔧 Admin Paneli
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Store current assignment data
+            window.currentAssignmentData = {
+                linkId: linkId,
+                linkDocId: linkDocId,
+                linkData: linkData
+            };
+
+            // Setup event listeners for quick assignment
+            setupQuickAssignmentListeners();
+            
+            // Load users for assignment
+            await loadUsersForQuickAssignment();
+        }
+
+        // Setup event listeners for quick assignment
+        function setupQuickAssignmentListeners() {
+            document.getElementById('quick-assign-user').addEventListener('change', loadPetsForQuickAssignment);
+            document.getElementById('quick-assign-pet').addEventListener('change', showQuickAssignmentPreview);
+            document.getElementById('quick-assign-form').addEventListener('submit', handleQuickAssignment);
+        }
+
+        // Load users for quick assignment
+        async function loadUsersForQuickAssignment() {
+            try {
+                const querySnapshot = await window.firebaseModules.getDocs(
+                    window.firebaseModules.collection(window.firebaseDb, 'users')
+                );
+                
+                const userSelect = document.getElementById('quick-assign-user');
+                userSelect.innerHTML = '<option value="">Kullanıcı seçiniz...</option>';
+
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+                    if (!user.isAdmin) { // Don't show admin users in assignment
+                        const option = document.createElement('option');
+                        option.value = doc.id;
+                        option.textContent = `${user.name} (${user.email})`;
+                        userSelect.appendChild(option);
+                    }
+                });
+            } catch (error) {
+                showToast('Kullanıcılar yüklenirken hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        // Load pets for quick assignment
+        async function loadPetsForQuickAssignment() {
+            const userId = document.getElementById('quick-assign-user').value;
+            const petSelect = document.getElementById('quick-assign-pet');
+            
+            // Hide preview
+            document.getElementById('quick-assign-preview').classList.add('hidden');
+            
+            if (!userId) {
+                petSelect.innerHTML = '<option value="">Önce kullanıcı seçiniz...</option>';
+                petSelect.disabled = true;
+                return;
+            }
+
+            try {
+                const q = window.firebaseModules.query(
+                    window.firebaseModules.collection(window.firebaseDb, 'pets'),
+                    window.firebaseModules.where('ownerId', '==', userId)
+                );
+                const querySnapshot = await window.firebaseModules.getDocs(q);
+                
+                petSelect.innerHTML = '<option value="">Hayvan seçiniz...</option>';
+                petSelect.disabled = false;
+
+                if (querySnapshot.empty) {
+                    petSelect.innerHTML = '<option value="">Bu kullanıcının hayvanı yok</option>';
+                    petSelect.disabled = true;
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const pet = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = `${pet.name} (${pet.species}${pet.breed ? ' - ' + pet.breed : ''})`;
+                    petSelect.appendChild(option);
+                });
+            } catch (error) {
+                showToast('Hayvan profilleri yüklenirken hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        // Show quick assignment preview
+        async function showQuickAssignmentPreview() {
+            const petId = document.getElementById('quick-assign-pet').value;
+            const previewDiv = document.getElementById('quick-assign-preview');
+            const petInfoDiv = document.getElementById('quick-assign-pet-info');
+            
+            if (!petId) {
+                previewDiv.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const petDoc = await window.firebaseModules.getDoc(
+                    window.firebaseModules.doc(window.firebaseDb, 'pets', petId)
+                );
+                
+                if (!petDoc.exists()) {
+                    showToast('Hayvan profili bulunamadı!', 'error');
+                    return;
+                }
+
+                const pet = petDoc.data();
+                
+                // Check if pet already has an NFC link
+                const q = window.firebaseModules.query(
+                    window.firebaseModules.collection(window.firebaseDb, 'nfc_links'),
+                    window.firebaseModules.where('petId', '==', petId),
+                    window.firebaseModules.where('isAssigned', '==', true)
+                );
+                const existingLinks = await window.firebaseModules.getDocs(q);
+                
+                let warningHtml = '';
+                if (!existingLinks.empty) {
+                    warningHtml = `
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                            <p class="text-yellow-800 text-sm">
+                                ⚠️ <strong>Uyarı:</strong> Bu hayvanın zaten ${existingLinks.size} adet NFC etiket(i) var.
+                            </p>
+                        </div>
+                    `;
+                }
+
+                petInfoDiv.innerHTML = `
+                    ${warningHtml}
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-3xl">${getAnimalEmoji(pet.species)}</span>
+                            <div>
+                                <h4 class="font-semibold text-lg">${pet.name}</h4>
+                                <p class="text-gray-600">${pet.species}${pet.breed ? ' • ' + pet.breed : ''}</p>
+                            </div>
+                        </div>
+                        ${pet.age ? `<p><strong>Yaş:</strong> ${pet.age}</p>` : ''}
+                        ${pet.color ? `<p><strong>Renk:</strong> ${pet.color}</p>` : ''}
+                        ${pet.gender ? `<p><strong>Cinsiyet:</strong> ${pet.gender}</p>` : ''}
+                        ${pet.description ? `<p><strong>Açıklama:</strong> ${pet.description}</p>` : ''}
+                        ${pet.homeAddress ? `<p><strong>Adres:</strong> ${pet.homeAddress}</p>` : ''}
+                    </div>
+                `;
+                
+                previewDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                showToast('Profil önizlemesi yüklenirken hata oluştu: ' + error.message, 'error');
+            }
+        }
+
+        // Handle quick assignment
+        async function handleQuickAssignment(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('quick-assign-user').value;
+            const petId = document.getElementById('quick-assign-pet').value;
+            const submitBtn = document.getElementById('quick-assign-btn');
+            
+            if (!userId || !petId) {
+                showToast('Lütfen kullanıcı ve hayvan seçin!', 'error');
+                return;
+            }
+
+            submitBtn.innerHTML = '<div class="loading"></div> Atanıyor...';
+            submitBtn.disabled = true;
+
+            try {
+                const { linkDocId } = window.currentAssignmentData;
+                
+                // Update the NFC link with assignment
+                await window.firebaseModules.updateDoc(
+                    window.firebaseModules.doc(window.firebaseDb, 'nfc_links', linkDocId),
+                    {
+                        isAssigned: true,
+                        petId: petId,
+                        userId: userId,
+                        assignedAt: new Date().toISOString(),
+                        assignedBy: currentUser.uid,
+                        quickAssigned: true
+                    }
+                );
+
+                showToast('NFC etiket başarıyla atandı! Profil yükleniyor...', 'success');
+                
+                // Redirect to the assigned pet profile
+                setTimeout(() => {
+                    loadPetProfile(petId, window.currentAssignmentData.linkId);
+                }, 1500);
+                
+            } catch (error) {
+                showToast('NFC etiket atanırken hata oluştu: ' + error.message, 'error');
+                submitBtn.innerHTML = '🔗 NFC Etiketini Ata';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Open admin panel function
+        function openAdminPanel() {
+            if (currentUser && isAdmin) {
+                showUserDashboard(); // This will show admin dashboard for admin users
+            } else {
+                showToast('Admin yetkisi gerekli!', 'error');
             }
         }
 
@@ -2564,7 +2917,7 @@
             displayUserPetLocations(filteredLocations);
         }
 
-        // Copy Patilink link
+        // Copy pet NFC link
         function copyPetNFCLink(url) {
             navigator.clipboard.writeText(url).then(() => {
                 showToast('Hayvan NFC linki kopyalandı!');
@@ -3014,6 +3367,5 @@
             }
         }
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99230a3f415350ed',t:'MTc2MTA3MzY2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99435fcf43d66942',t:'MTc2MTQxMjcxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
